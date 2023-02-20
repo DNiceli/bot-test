@@ -5,7 +5,8 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "devStart": "nodemon bot.ks"
+    "devStart": "nodemon bot.ks",
+    "debug": "nodemon --inspect bot.js"
   },
   "keywords": [],
   "author": "",
