@@ -25,7 +25,9 @@ module.exports = {
             { name: 'Feels Like', value: "" + json.main.feels_like + " °C", inline: true },
             { name: 'Max Temp', value: "" + json.main.temp_max + " °C", inline: true  },
             { name: 'Min Temp', value: "" + json.main.temp_min + " °C", inline: true  },
+            { name: 'Main', value: "" + json.weather[0].main}
         )
+        .setImage(`http://openweathermap.org/img/wn/${json.weather[0].icon}@2x.png`)
 
         
 		interaction.reply({ embeds: [weatherEmbed]});
