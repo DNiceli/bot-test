@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Users, CurrencyShop } = require('./dbObjects.js');
 const { Op } = require('sequelize');
+const util = require('./util/util.js')
 
 const { Client, Collection, Events, GatewayIntentBits, codeBlock } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
@@ -27,12 +28,14 @@ client.once(Events.ClientReady, async () => {
 	storedBalances.forEach(b => currency.set(b.user_id, b));
 
 	console.log(`Logged in as ${client.user.tag}!`);
+	console.log(currency);
 });
 
 
 client.on(Events.MessageCreate, async message => {
 	if (message.author.bot) return;
-	addBalance(message.author.id, 1);
+	util.addBalance(message.author.id, 1, currency);
+	console.log(currency);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -51,27 +54,8 @@ client.on(Events.InteractionCreate, async interaction => {
 		console.error(error);
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
-});
+});;
 
-module.exports = {currency}
-
-async function addBalance(id, amount) {
-	const user = currency.get(id);
-
-	if (user) {
-		user.balance += Number(amount);
-		return user.save();
-	}
-
-	const newUser = await Users.create({ user_id: id, balance: amount });
-	currency.set(id, newUser);
-
-	return newUser;
-}
-
-function getBalance(id) {
-	const user = currency.get(id);
-	return user ? user.balance : 0;
-}
+module.exports = currency
 
 client.login(process.env.BOT_TOKEN)
