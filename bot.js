@@ -8,7 +8,7 @@ const util = require('./util/util.js')
 const { Client, Collection, Events, GatewayIntentBits, codeBlock } = require('discord.js');
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
-const currency = new Collection();
+const currency = require('./currency.js');
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -24,11 +24,7 @@ for (const file of commandFiles) {
 }
 
 client.once(Events.ClientReady, async () => {
-	const storedBalances = await Users.findAll();
-	storedBalances.forEach(b => currency.set(b.user_id, b));
-
 	console.log(`Logged in as ${client.user.tag}!`);
-	console.log(currency);
 });
 
 
@@ -54,8 +50,8 @@ client.on(Events.InteractionCreate, async interaction => {
 		console.error(error);
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
-});;
+});
 
-module.exports = currency
+exports =  currency;
 
 client.login(process.env.BOT_TOKEN)
