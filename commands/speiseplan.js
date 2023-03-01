@@ -1,3 +1,4 @@
+require("dotenv").config();
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
@@ -9,8 +10,7 @@ module.exports = {
     .setDescription("sieht speiseplan mensadaten"),
   async execute(interaction) {
     try {
-      const url =
-        "https://www.imensa.de/berlin/mensa-luxemburger-strasse/index.html";
+      const url = process.env.mensaUrl;
       const response = await axios.get(url);
       const $ = cheerio.load(response.data);
 
