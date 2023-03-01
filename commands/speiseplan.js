@@ -1,7 +1,7 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { Speisekarte } = require("./dbObjects.js");
+const { Speisekarte } = require("../dbObjects.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,28 +13,58 @@ module.exports = {
         "https://www.imensa.de/berlin/mensa-luxemburger-strasse/index.html";
       const response = await axios.get(url);
       const $ = cheerio.load(response.data);
-      const menuItems = [];
 
-      $(".aw-meal").each(function () {
-        var name = $(this).find(".aw-meal-description").text();
-        var description = $(this)
-          .find(".aw-meal-attributes span:first-child")
-          .text();
-        var price = $(this).find(".aw-meal-price").text();
+      const categories = $(".aw-meal-category");
 
-        menuItems.push({ name, description, price });
+      const mealsByCategory = {};
+
+      categories.each(function () {
+        const categoryName = $(this).find(".aw-meal-category-name").text();
+
+        const meals = $(this).find(".aw-meal");
+
+        meals.each(function () {
+          const mealName = $(this).find(".aw-meal-description").text();
+          const mealDescription = $(this).find(".aw-meal-attributes").text();
+
+          const lastOffered = $(this).find(".aw-meal-last").text();
+
+          const mealPrice = $(this).find(".aw-meal-price").text();
+
+          if (!mealsByCategory[categoryName]) {
+            mealsByCategory[categoryName] = [];
+          }
+
+          mealsByCategory[categoryName].push({
+            name: mealName,
+            description: mealDescription,
+            lastOffered: lastOffered,
+            price: mealPrice,
+          });
+        });
       });
 
-      const speisekrate = new EmbedBuilder()
-        .setTitle("Speiseplan")
+      const speisekarte = new EmbedBuilder()
+        .setTitle(`__Speiseplan__`)
         .setColor("#00ff00")
         .setDescription("Menü für heute")
         .setTimestamp();
-      menuItems.forEach((item) => {
-        speisekrate.addFields({ name: item.name, value: item.price });
-      });
 
-      await interaction.reply({ embeds: [speisekrate] });
+      for (const category in mealsByCategory) {
+        const meals = mealsByCategory[category];
+
+        const mealStrings = meals
+          .map(
+            (meal) => `${meal.name} - ${meal.price}`
+            //`**${meal.name}** - ${meal.price}\n${meal.description}\n_Last offered: ${meal.lastOffered}_`
+          )
+          .join("\n\n");
+
+        speisekarte.addFields({ name: " ", value: `**${category}**` });
+        speisekarte.addFields({ name: " ", value: mealStrings });
+      }
+
+      await interaction.reply({ embeds: [speisekarte] });
     } catch (error) {
       console.error(error);
       await interaction.reply("ERROR ERROR, siehe console");
