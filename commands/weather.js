@@ -1,6 +1,6 @@
 require('dotenv').config()
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { request } = require('undici');
+const axios = require('axios');
 
 
 module.exports = {
@@ -13,9 +13,9 @@ module.exports = {
 	async execute(interaction) {
         const apiKey = process.env.weatherApiKey;
         const city = interaction.options.getString("input");
-        const weatherResult = await request(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+        const weatherResult = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
 
-        const json = await weatherResult.body.json();
+        const json = weatherResult.data;
 
         const weatherEmbed = new EmbedBuilder()
         .setColor(0x0099FF)

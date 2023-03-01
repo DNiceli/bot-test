@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { request } = require('undici');
+const axios = require('axios');
 
 
 module.exports = {
@@ -7,9 +7,9 @@ module.exports = {
 		.setName('cat')
 		.setDescription('Replies with a random cat pic.'),
 	async execute(interaction) {
-		const catResult = await request('https://aws.random.cat/meow');
+		const catResult = await axios.get('https://aws.random.cat/meow');
 
-		const { file } = await catResult.body.json();
+		const { file } = await catResult.data;
         
 		interaction.reply({ files: [file] });
 	},
