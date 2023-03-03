@@ -11,6 +11,7 @@ Ziel dieser Arbeit ist es, einen funktionsfähigen Discord Bot zu entwickeln, de
 ## **Forschungsfrage**
 
 Wie kann ein Discord Bot zur Speiseplan-Auslesung und Generierung von Gerichtsbildern entwickelt werden, um die Essensauswahl der Studierenden in Mensen zu erleichtern und zu verbessern?
+
 Wie kann ein Discord Bot entwickelt werden, der den Speiseplan der BHT auslesen und die Gerichte in Form von Bildern generieren kann und welche zusätzlichen Funktionalitäten können hinzugefügt werden, um das Nutzererlebnis zu verbessern?
 
 ## **Methodik**
