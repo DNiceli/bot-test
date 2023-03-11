@@ -8,6 +8,7 @@ const sequelize = new Sequelize("database", "username", "password", {
 });
 
 const Users = require("./models/Users.js")(sequelize, Sequelize.DataTypes);
+const OpUsers = require("./models/OpUser.js")(sequelize, Sequelize.DataTypes);
 const CurrencyShop = require("./models/CurrencyShop.js")(
   sequelize,
   Sequelize.DataTypes
@@ -51,4 +52,4 @@ Reflect.defineProperty(Users.prototype, "getItems", {
   },
 });
 
-module.exports = { Users, CurrencyShop, UserItems, Speisekarte };
+module.exports = { Users, CurrencyShop, UserItems, Speisekarte, OpUsers };

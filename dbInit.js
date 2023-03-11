@@ -12,6 +12,7 @@ const CurrencyShop = require("./models/CurrencyShop.js")(
   Sequelize.DataTypes
 );
 require("./models/Users.js")(sequelize, Sequelize.DataTypes);
+require("./models/OpUser.js")(sequelize, Sequelize.DataTypes);
 require("./models/UserItems.js")(sequelize, Sequelize.DataTypes);
 require("./models/Speisekarte.js")(sequelize, Sequelize.DataTypes);
 
