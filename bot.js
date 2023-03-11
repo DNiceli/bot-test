@@ -39,11 +39,11 @@ client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-//client.on(Events.MessageCreate, async message => {
-//	if (message.author.bot) return;
-//	util.addBalance(message.author.id, 1, currency);
-//	console.log(currency);
-//});
+client.on(Events.MessageCreate, async (message) => {
+  if (message.author.bot) return;
+  util.addBalance(message.author.id, 1, currency);
+  console.log(currency);
+});
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
