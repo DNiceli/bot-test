@@ -8,12 +8,12 @@ const myId = "130787506441420801";
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("check-availability")
+    .setName("zeldacheck")
     .setDescription("Checks availability of a product"),
 
   async execute(interaction) {
     const url =
-      "https://www.saturn.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html";
+      "https://www.saturn.de/de/product/_the-legend-of-zelda-tears-of-the-kingdom-collectors-edition-nintendo-switch-2860845.html?utm_source=easymarketing&utm_medium=aff-content&utm_term=50239-a2068f6682bb474c9e57afcfe852698c&utm_campaign=AFF_Startseite-AO&emid=640e681f2619570b4a187236";
 
     if (interaction.user.id !== myId) {
       return interaction.reply(
@@ -45,10 +45,7 @@ module.exports = {
         );
 
         i = i + 1;
-        if (
-          onlineStatus === "AVAILABLE" ||
-          crossAvailabilityStatus === "AVAILABLE"
-        ) {
+        if (onlineStatus === "AVAILABLE") {
           if (!isAvailable) {
             console.log("Product is available! Saturn refresh");
             const currentTime = Date.now(); // Get the current time
@@ -58,17 +55,7 @@ module.exports = {
               if (onlineStatus === "AVAILABLE") {
                 userList.forEach((u) => {
                   u.send(
-                    "The product is now available at : https://www.saturn.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html?utm_source=mediamarkt.de&utm_medium=own-pdp%20button"
-                  ).catch((err) => {
-                    console.log("Error caused by " + u);
-                    console.log(err);
-                  });
-                });
-              }
-              if (crossAvailabilityStatus === "AVAILABLE") {
-                userList.forEach((u) => {
-                  u.send(
-                    "The product is now available at : https://www.mediamarkt.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html?utm_source=saturn.de&amp;utm_medium=own-pdp%20button"
+                    "The product is now available at : https://www.saturn.de/de/product/_the-legend-of-zelda-tears-of-the-kingdom-collectors-edition-nintendo-switch-2860845.html?utm_source=easymarketing&utm_medium=aff-content&utm_term=50239-a2068f6682bb474c9e57afcfe852698c&utm_campaign=AFF_Startseite-AO&emid=640e681f2619570b4a187236"
                   ).catch((err) => {
                     console.log("Error caused by " + u);
                     console.log(err);
@@ -82,6 +69,6 @@ module.exports = {
           isAvailable = false;
         }
       });
-    }, 10000);
+    }, 180000);
   },
 };

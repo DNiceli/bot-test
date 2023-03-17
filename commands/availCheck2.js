@@ -1,19 +1,17 @@
 const { SlashCommandBuilder } = require("@discordjs/builders");
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { SelectMenuOptionBuilder } = require("discord.js");
 const userList = require("../userListOp.js");
 
 const myId = "130787506441420801";
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("check-availability")
+    .setName("check-avail2")
     .setDescription("Checks availability of a product"),
-
   async execute(interaction) {
     const url =
-      "https://www.saturn.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html";
+      "https://www.mediamarkt.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html?utm_source=saturn.de&amp;utm_medium=own-pdp%20buttonnpm ";
 
     if (interaction.user.id !== myId) {
       return interaction.reply(
@@ -22,6 +20,12 @@ module.exports = {
     }
 
     interaction.reply("Refreshes started");
+    console.log(userList);
+
+    /*userList.forEach((u) => {
+      const user = message.guild.members.cache.find();
+    });
+    */
 
     // Start listening for availability
     let isAvailable = false;
@@ -40,7 +44,7 @@ module.exports = {
         console.log(
           "checking availability... " +
             userList.map((u) => u.username) +
-            " Saturn " +
+            " MM " +
             i
         );
 
@@ -50,15 +54,14 @@ module.exports = {
           crossAvailabilityStatus === "AVAILABLE"
         ) {
           if (!isAvailable) {
-            console.log("Product is available! Saturn refresh");
-            const currentTime = Date.now(); // Get the current time
+            const currentTime = Date.now();
+            console.log("Product is available! MM refresh");
             if (currentTime - lastNotificationTime >= 180000) {
-              // Check if 3 minutes have passed since the last notification
               isAvailable = true;
               if (onlineStatus === "AVAILABLE") {
                 userList.forEach((u) => {
                   u.send(
-                    "The product is now available at : https://www.saturn.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html?utm_source=mediamarkt.de&utm_medium=own-pdp%20button"
+                    "The product is now available at : https://www.mediamarkt.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html?utm_source=saturn.de&amp;utm_medium=own-pdp%20buttonl"
                   ).catch((err) => {
                     console.log("Error caused by " + u);
                     console.log(err);
@@ -68,7 +71,7 @@ module.exports = {
               if (crossAvailabilityStatus === "AVAILABLE") {
                 userList.forEach((u) => {
                   u.send(
-                    "The product is now available at : https://www.mediamarkt.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html?utm_source=saturn.de&amp;utm_medium=own-pdp%20button"
+                    "The product is now available at : https://www.saturn.de/de/product/_bandai-one-piece-card-game-paramount-war-booster-op-02-einzelartikel-sammelkarten-2833371.html?utm_source=mediamarkt.de&utm_medium=own-pdp%20button"
                   ).catch((err) => {
                     console.log("Error caused by " + u);
                     console.log(err);
@@ -82,6 +85,6 @@ module.exports = {
           isAvailable = false;
         }
       });
-    }, 10000);
+    }, 3000);
   },
 };

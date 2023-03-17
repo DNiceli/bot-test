@@ -1,6 +1,7 @@
 const { OpUsers } = require("./dbObjects");
 const userList = [];
 
+/*
 async function populateUsers() {
   const allUsers = await OpUsers.findAll();
   allUsers.forEach((b) => userList.push(b));
@@ -10,4 +11,5 @@ async function populateUsers() {
 }
 
 populateUsers();
+*/
 module.exports = userList;

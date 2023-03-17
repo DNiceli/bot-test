@@ -4,6 +4,7 @@ const path = require("node:path");
 const { Users, CurrencyShop } = require("./dbObjects.js");
 const { Op } = require("sequelize");
 const util = require("./util/util.js");
+const userList = require("./userListOp.js");
 
 const {
   Client,
@@ -13,7 +14,12 @@ const {
   codeBlock,
 } = require("discord.js");
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 const currency = require("./currency.js");
@@ -37,14 +43,32 @@ for (const file of commandFiles) {
 
 client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  const guild = client.guilds.cache.get("1084119229776805928");
+  if (!guild) {
+    console.log("cant find");
+  }
+  // Fetch all members in the guild and cache them
+  await guild.members.fetch();
+
+  // Get a collection of all members in the guild
+  const members = guild.members.cache;
+
+  // Loop through each member in the collection and add them to the array
+  members.forEach((member) => {
+    if (!member.user.bot) {
+      userList.push(member.user);
+    }
+  });
+  console.log(userList);
 });
 
+/*
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
   util.addBalance(message.author.id, 1, currency);
   console.log(currency);
 });
-
+*/
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
