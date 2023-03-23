@@ -17,6 +17,7 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "sequelize": "^6.28.0",
+    "sharp": "^0.31.3",
     "sqlite3": "^5.1.4"
   },
   "devDependencies": {
