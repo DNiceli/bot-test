@@ -6,6 +6,19 @@ const { MessageAttachment } = require("discord.js");
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Speisekarte } = require("../dbObjects.js");
 
+const arrowLeft = "\u2B05";
+const arrowRight = "\u27A1";
+
+const categoryEmojis = {
+  Vorspeisen: "\uD83C\uDF4F",
+  Salate: "\uD83E\uDD57",
+  Essen: "\uD83C\uDF5B",
+  Desserts: "\uD83C\uDF70",
+  Suppen: "\uD83C\uDF5C",
+  Aktionen: "\uD83D\uDC51",
+  Beilagen: "\uD83C\uDF5A",
+};
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("speiseplan2")
@@ -17,10 +30,10 @@ module.exports = {
       const menu = new Map();
       await axios
         .post(
-          "https://www.stw.berlin/xhr/speiseplan-wochentag.html",
+          url,
           new URLSearchParams({
             resources_id: "527",
-            date: "2023-03-23",
+            date: "2023-03-24",
           }),
           {
             headers: {
@@ -69,36 +82,62 @@ module.exports = {
           console.log(error);
         });
 
-      const pngs = [];
-      const speisekarte = new EmbedBuilder()
-        .setTitle(`__Speiseplan__`)
-        .setColor("#00ff00")
-        .setDescription("Menü für heute")
-        .setTimestamp();
-
-      menu.forEach(async (meals, category) => {
-        const mealStrings = meals
-          .map(
-            (meal) => `${meal.name} - ${meal.price}`
-            //`**${meal.name}** - ${meal.price}\n${meal.description}\n_Last offered: ${meal.lastOffered}_`
-          )
-          .join("\n\n");
-
-        speisekarte.addFields({ name: " ", value: `**${category}**` });
-        speisekarte.addFields({ name: " ", value: mealStrings });
-      });
-
       const deserts = menu.get("Desserts");
-      console.log(deserts[0]);
       const img = await generateMenuCard(deserts[0]);
-
-      console.log(pngs[0]);
-      await interaction.editReply({
+      const message = await interaction.editReply({
         content: "Here's the menu card:",
         files: [img],
       });
 
-      await interaction.editReply({ embeds: [speisekarte] });
+      for (const category of menu.keys()) {
+        console.log(category);
+        await message.react(categoryEmojis[category]);
+      }
+
+      await message.react(arrowLeft);
+      await message.react(arrowRight);
+
+      // Create the message collector to listen for reactions of users
+      const filter = (reaction, user) => user.id === interaction.user.id;
+      const collector = message.createReactionCollector({
+        filter,
+        time: 60000,
+      });
+
+      let currentCategory = "Desserts";
+      let currentIndex = 0;
+
+      collector.on("collect", async (reaction, user) => {
+        const reactedEmoji = reaction.emoji.name;
+        const selectedCategory = Object.keys(categoryEmojis).find(
+          (category) => categoryEmojis[category] === reactedEmoji
+        );
+
+        if (selectedCategory) {
+          currentCategory = selectedCategory;
+          currentIndex = 0;
+        } else if (reactedEmoji === arrowLeft) {
+          currentIndex =
+            (currentIndex - 1 + menu.get(currentCategory).length) %
+            menu.get(currentCategory).length;
+        } else if (reactedEmoji === arrowRight) {
+          currentIndex = (currentIndex + 1) % menu.get(currentCategory).length;
+        }
+
+        const dish = menu.get(currentCategory)[currentIndex];
+        const newImg = await generateMenuCard(dish);
+        await message.edit({
+          content: "Here's the menu card:",
+          files: [newImg],
+        });
+
+        await reaction.users.remove(interaction.user.id);
+      });
+
+      collector.on("end", () => {
+        // Remove reactions when the collector ends
+        message.reactions.removeAll();
+      });
     } catch (error) {
       console.error(error);
       await interaction.editReply("ERROR ERROR, siehe console");
