@@ -17,7 +17,7 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "html-to-image": "^1.11.11",
-    "puppeteer": "^19.7.5",
+    "puppeteer": "^19.8.2",
     "sequelize": "^6.28.0",
     "sharp": "^0.31.3",
     "sqlite3": "^5.1.4"

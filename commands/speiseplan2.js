@@ -2,6 +2,7 @@ require("dotenv").config();
 const axios = require("axios");
 const sharp = require("sharp");
 const cheerio = require("cheerio");
+const puppeteer = require("puppeteer");
 const { MessageAttachment } = require("discord.js");
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Speisekarte } = require("../dbObjects.js");
@@ -32,8 +33,8 @@ module.exports = {
         .post(
           url,
           new URLSearchParams({
-            resources_id: "527",
-            date: "2023-03-24",
+            resources_id: "527", // bht ID: 527
+            date: "2023-03-30", // Datum
           }),
           {
             headers: {
@@ -145,7 +146,7 @@ module.exports = {
   },
 };
 
-async function generateMenuCard(dish) {
+async function generateMenuCard2(dish) {
   const svgTemplate = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
   <rect x="0" y="0" width="400" height="200" fill="#f8f8f8" />
   <text x="20" y="40" font-size="24" font-weight="bold" fill="#333333">__NAME__</text>
@@ -161,5 +162,84 @@ async function generateMenuCard(dish) {
   console.log(svgData);
 
   const pngBuffer = await sharp(Buffer.from(svgData)).png().toBuffer();
+  return pngBuffer;
+}
+
+async function generateMenuCard(dish) {
+  const categoryColors = {
+    Vorspeisen: "#FFDAB9",
+    Essen: "#ADD8E6",
+    Salate: "#FFFACD",
+    Suppen: "#FFFACD",
+    Beilagen: "#FFFACD",
+    Desserts: "#FFFACD",
+    Aktionen: "#E6E6FA",
+  };
+
+  const htmlTemplate = `
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <style>
+        body {
+          width: 400px;
+          height: 200px;
+          font-family: Arial, sans-serif;
+          background-color: ${categoryColors[dish.category]};
+          margin: 0;
+          padding: 0;
+          position: relative;
+        }
+        .image-placeholder {
+          width: 60px;
+          height: 60px;
+          background-color: #CCCCCC;
+          position: absolute;
+          top: 20px;
+          left: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .name {
+          font-size: 18px;
+          font-weight: bold;
+          color: #333333;
+          position: absolute;
+          top: 20px;
+          left: 100px;
+        }
+        .price {
+          font-size: 14px;
+          color: #333333;
+          position: absolute;
+          top: 60px;
+          left: 100px;
+        }
+        .allergens {
+          font-size: 10px;
+          color: #333333;
+          position: absolute;
+          top: 120px;
+          left: 20px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="image-placeholder">IMG</div>
+      <div class="name">${dish.name}</div>
+      <div class="price">Price: ${dish.price}</div>
+      <div class="allergens">Allergens: ${dish.allergens}</div>
+    </body>
+  </html>`;
+
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  await page.setContent(htmlTemplate);
+  const pngBuffer = await page.screenshot({
+    type: "png",
+    clip: { x: 0, y: 0, width: 400, height: 200 },
+  });
+  await browser.close();
   return pngBuffer;
 }
