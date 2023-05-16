@@ -22,12 +22,6 @@ module.exports = {
     interaction.reply("Refreshes started");
     console.log(userList);
 
-    /*userList.forEach((u) => {
-      const user = message.guild.members.cache.find();
-    });
-    */
-
-    // Start listening for availability
     let isAvailable = false;
     let lastNotificationTime = 0;
     let i = 0;

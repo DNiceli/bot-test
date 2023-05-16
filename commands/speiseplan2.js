@@ -34,7 +34,7 @@ module.exports = {
           url,
           new URLSearchParams({
             resources_id: "527", // bht ID: 527
-            date: "2023-03-30", // Datum
+            date: "2023-03-31", // Datum
           }),
           {
             headers: {
@@ -126,7 +126,8 @@ module.exports = {
         }
 
         const dish = menu.get(currentCategory)[currentIndex];
-        const newImg = await generateMenuCard(dish);
+
+        const newImg = await generateMenuCard(dish, currentCategory);
         await message.edit({
           content: "Here's the menu card:",
           files: [newImg],
@@ -165,7 +166,7 @@ async function generateMenuCard2(dish) {
   return pngBuffer;
 }
 
-async function generateMenuCard(dish) {
+async function generateMenuCard(dish, currentCategory) {
   const categoryColors = {
     Vorspeisen: "#FFDAB9",
     Essen: "#ADD8E6",
@@ -176,6 +177,8 @@ async function generateMenuCard(dish) {
     Aktionen: "#E6E6FA",
   };
 
+  const color = categoryColors[currentCategory] || "#FFFFFF"; // default to white if category is unknown
+
   const htmlTemplate = `
   <!DOCTYPE html>
   <html>
@@ -185,7 +188,7 @@ async function generateMenuCard(dish) {
           width: 400px;
           height: 200px;
           font-family: Arial, sans-serif;
-          background-color: ${categoryColors[dish.category]};
+          background-color: ${color};
           margin: 0;
           padding: 0;
           position: relative;
