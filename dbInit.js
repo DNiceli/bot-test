@@ -15,6 +15,7 @@ require("./models/Users.js")(sequelize, Sequelize.DataTypes);
 require("./models/OpUser.js")(sequelize, Sequelize.DataTypes);
 require("./models/UserItems.js")(sequelize, Sequelize.DataTypes);
 require("./models/Speisekarte.js")(sequelize, Sequelize.DataTypes);
+require("./models/Dish.js")(sequelize, Sequelize.DataTypes);
 
 const force = process.argv.includes("--force") || process.argv.includes("-f");
 

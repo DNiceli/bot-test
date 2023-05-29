@@ -22,6 +22,8 @@ const Speisekarte = require("./models/Speisekarte.js")(
   Sequelize.DataTypes
 );
 
+const Dish = require("./models/Dish.js")(sequelize, Sequelize.DataTypes);
+
 UserItems.belongsTo(CurrencyShop, { foreignKey: "item_id", as: "item" });
 
 Reflect.defineProperty(Users.prototype, "addItem", {
@@ -52,4 +54,4 @@ Reflect.defineProperty(Users.prototype, "getItems", {
   },
 });
 
-module.exports = { Users, CurrencyShop, UserItems, Speisekarte, OpUsers };
+module.exports = { Users, CurrencyShop, UserItems, Speisekarte, OpUsers, Dish };
