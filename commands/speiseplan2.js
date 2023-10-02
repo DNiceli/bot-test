@@ -4,6 +4,7 @@ const sharp = require("sharp");
 const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
 const { SlashCommandBuilder } = require("discord.js");
+const Dish = require("../models/Dish.js");
 
 const arrowLeft = "\u2B05";
 const arrowRight = "\u27A1";
@@ -71,6 +72,8 @@ module.exports = {
                 };
                 console.log(dish.allergens);
                 dishes.push(dish);
+
+                Dish;
               });
 
             menu.set(group, dishes);
