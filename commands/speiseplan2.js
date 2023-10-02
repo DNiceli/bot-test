@@ -3,10 +3,7 @@ const axios = require("axios");
 const sharp = require("sharp");
 const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
-const { MessageAttachment } = require("discord.js");
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { Speisekarte } = require("../dbObjects.js");
-const { Dish } = require("../dbObjects.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 const arrowLeft = "\u2B05";
 const arrowRight = "\u27A1";
@@ -35,7 +32,7 @@ module.exports = {
           url,
           new URLSearchParams({
             resources_id: "527", // bht ID: 527
-            date: "2023-05-30", // Datum
+            date: "2023-10-04", // Datum
           }),
           {
             headers: {
@@ -74,8 +71,6 @@ module.exports = {
                 };
                 console.log(dish.allergens);
                 dishes.push(dish);
-
-                await Dish.create(dish);
               });
 
             menu.set(group, dishes);

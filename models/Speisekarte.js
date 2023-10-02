@@ -1,17 +1,16 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define("speisekarte", {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    name: DataTypes.STRING,
-    preis: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      default: 0,
-    },
-    beschreibung: DataTypes.STRING,
-    allergene: DataTypes.STRING,
-  });
-};
+const mongoose = require("mongoose");
+
+const speisekarteSchema = new Schema({
+  name: String,
+  preis: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  beschreibung: String,
+  allergene: String,
+});
+
+const Speisekarte = mongoose.model("Speisekarte", speisekarteSchema);
+
+module.exports = { Speisekarte };

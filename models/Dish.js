@@ -1,49 +1,52 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
-    "dish",
-    {
-      id: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-      },
-      name: {
-        type: DataTypes.STRING,
-        defaultValue: "",
-        allowNull: false,
-      },
-      category: {
-        type: DataTypes.STRING,
-        defaultValue: "",
-        allowNull: false,
-      },
-      price: {
-        type: DataTypes.FLOAT,
-        defaultValue: 0,
-        allowNull: false,
-      },
-      allergens: {
-        type: DataTypes.STRING,
-        defaultValue: "",
-        allowNull: true,
-      },
-      co2: {
-        type: DataTypes.STRING,
-        defaultValue: "",
-        allowNull: false,
-      },
-      h2o: {
-        type: DataTypes.STRING,
-        defaultValue: "",
-        allowNull: false,
-      },
-      ampel: {
-        type: DataTypes.STRING,
-        defaultValue: "",
-        allowNull: false,
-      },
+const mongoose = require("mongoose");
+
+const dishSchema = new Schema(
+  {
+    id: {
+      type: String,
+      required: true,
+      unique: true,
     },
-    {
-      timestamps: false,
-    }
-  );
-};
+    name: {
+      type: String,
+      required: true,
+      default: "",
+    },
+    category: {
+      type: String,
+      required: true,
+      default: "",
+    },
+    price: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    allergens: {
+      type: String,
+      default: "",
+    },
+    co2: {
+      type: String,
+      required: true,
+      default: "",
+    },
+    h2o: {
+      type: String,
+      required: true,
+      default: "",
+    },
+    ampel: {
+      type: String,
+      required: true,
+      default: "",
+    },
+  },
+  {
+    timestamps: false,
+  }
+);
+
+const Dish = mongoose.model("Dish", dishSchema);
+
+module.exports = { Dish };

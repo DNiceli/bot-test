@@ -2,7 +2,6 @@ require("dotenv").config();
 const axios = require("axios");
 const cheerio = require("cheerio");
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const { Speisekarte } = require("../dbObjects.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,6 +12,8 @@ module.exports = {
       const url = process.env.mensaUrl;
       const response = await axios.get(url);
       const $ = cheerio.load(response.data);
+
+      console.log($.html());
 
       const categories = $(".aw-meal-category");
 
