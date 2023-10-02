@@ -2,6 +2,7 @@ require("dotenv").config();
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("./dbInit.js");
+const { fetchAndSaveDishes } = require("./commands/fetchdishes.js");
 
 const {
   Client,
@@ -18,6 +19,12 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessageReactions,
   ],
+});
+
+client.once("ready", () => {
+  console.log("Bot is online!");
+
+  fetchAndSaveDishes();
 });
 
 client.commands = new Collection();

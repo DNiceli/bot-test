@@ -108,4 +108,36 @@ async function parseDish(dish, category, date) {
   }
 }
 
-module.exports = { Dish, createOrUpdateDishWithCurrentDate };
+async function fetchDishesFromToday() {
+  // Get today's date at midnight
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Get tomorrow's date at midnight
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  try {
+    const dishes = await Dish.find({
+      date: {
+        $gte: today,
+        $lt: tomorrow,
+      },
+    }).exec();
+
+    if (dishes.length === 0) {
+      console.log("No dishes found for today.");
+    } else {
+      console.log(`Found ${dishes.length} dishes for today.`);
+      return dishes;
+    }
+  } catch (err) {
+    console.error("An error occurred while fetching dishes:", err);
+  }
+}
+
+module.exports = {
+  Dish,
+  createOrUpdateDishWithCurrentDate,
+  fetchDishesFromToday,
+};
