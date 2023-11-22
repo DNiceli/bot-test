@@ -63,32 +63,27 @@ async function createOrUpdateDishWithCurrentDate(dish, category) {
 }
 
 async function createOrUpdateDish(dish, date, category) {
-  const existingDish = await Dish.findOne({ name: dish.name });
+  const normalizedDate = new Date(date);
+  normalizedDate.setHours(0, 0, 0, 0); // Normalize the date to midnight
+
+  const existingDish = await Dish.findOne({
+    name: dish.name,
+    date: normalizedDate, // Use both name and normalized date for uniqueness
+  });
 
   if (!existingDish) {
-    await parseDish(dish, category, date)
+    await parseDish(dish, category, normalizedDate)
       .then(() => console.log("Dish created!"))
       .catch((err) => console.error("Could not create dish:", err));
   } else {
-    const existingDate = new Date(existingDish.date);
-    const newDate = new Date(date);
-
-    if (existingDate.toDateString() !== newDate.toDateString()) {
-      await parseDish(dish, category, newDate)
-        .then(() =>
-          console.log("New instance of dish created for a different day!")
-        )
-        .catch((err) =>
-          console.error("Could not create new instance of dish:", err)
-        );
-    } else {
-      console.log("Dish already exists for the same day");
-    }
+    console.log("Dish already exists for the same day");
   }
 }
 
 async function parseDish(dish, category, date) {
   const uniqueId = uuidv4();
+  const normalizedDate = new Date(date);
+  normalizedDate.setHours(0, 0, 0, 0); // Normalize the date to midnight
 
   try {
     await Dish.create({
@@ -100,7 +95,7 @@ async function parseDish(dish, category, date) {
       co2: dish.co2,
       h2o: dish.h2o,
       ampel: dish.ampel,
-      date: date,
+      date: normalizedDate,
     });
     console.log(`Dish ${dish.name} created successfully with ID ${uniqueId}`);
   } catch (err) {

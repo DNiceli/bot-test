@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { SlashCommandBuilder } = require("discord.js");
-const Favorite = require("../models/Favorite.js");
-const Dish = require("../models/Dish.js");
+const { Favorite } = require("../models/Favorite.js");
+const { Dish } = require("../models/Dish.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ module.exports = {
       const dishId = interaction.options.getString("dish_id");
       const userId = interaction.user.id;
 
-      const dishExists = await Dish.findById(dishId);
+      const dishExists = await Dish.findOne({ id: dishId });
       if (!dishExists) {
         await interaction.editReply("Gericht nicht gefunden.");
         return;

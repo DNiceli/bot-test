@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 const favoriteSchema = new Schema(
   {
     userId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },
     dishId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "Dish",
       required: true,
     },
@@ -20,3 +20,7 @@ const favoriteSchema = new Schema(
 );
 
 const Favorite = mongoose.model("Favorite", favoriteSchema);
+
+module.exports = {
+  Favorite,
+};

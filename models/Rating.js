@@ -4,12 +4,12 @@ const Schema = mongoose.Schema;
 const ratingSchema = new Schema(
   {
     userId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },
     dishId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "Dish",
       required: true,
     },
@@ -25,3 +25,7 @@ const ratingSchema = new Schema(
 );
 
 const Rating = mongoose.model("Rating", ratingSchema);
+
+module.exports = {
+  Rating,
+};

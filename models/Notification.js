@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const notificationSchema = new Schema(
   {
     userId: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "User",
       required: true,
     },
@@ -19,3 +19,7 @@ const notificationSchema = new Schema(
 );
 
 const Notification = mongoose.model("Notification", notificationSchema);
+
+module.exports = {
+  Notification,
+};
