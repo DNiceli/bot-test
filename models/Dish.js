@@ -30,12 +30,12 @@ const dishSchema = new Schema(
     },
     co2: {
       type: String,
-      required: true,
+      required: false,
       default: "",
     },
     h2o: {
       type: String,
-      required: true,
+      required: false,
       default: "",
     },
     ampel: {
