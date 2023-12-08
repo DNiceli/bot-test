@@ -5,9 +5,11 @@ const cheerio = require("cheerio");
 const puppeteer = require("puppeteer");
 const { SlashCommandBuilder } = require("discord.js");
 const Dish = require("../models/Dish.js");
+const Favorite = require("../models/Favorite.js");
 
 const arrowLeft = "\u2B05";
 const arrowRight = "\u27A1";
+const star = "\u2b50";
 
 const categoryEmojis = {
   Vorspeisen: "\uD83C\uDF4F",
@@ -98,6 +100,7 @@ module.exports = {
 
       await message.react(arrowLeft);
       await message.react(arrowRight);
+      await message.react(star);
 
       // Create the message collector to listen for reactions of users
       const filter = (reaction, user) => user.id === interaction.user.id;
@@ -124,6 +127,12 @@ module.exports = {
             menu.get(currentCategory).length;
         } else if (reactedEmoji === arrowRight) {
           currentIndex = (currentIndex + 1) % menu.get(currentCategory).length;
+        } else if (reactedEmoji === star) {
+          if (!interaction.guild) return; // Returns as there is no guild
+          var guild = interaction.guild.id;
+          var userID = interaction.user.id;
+          var dishId = menu.get(currentCategory)[currentIndex].name;
+          Favorite.createOrUpdateFavorite(guild, userID, dishId);
         }
 
         const dish = menu.get(currentCategory)[currentIndex];

@@ -64,11 +64,11 @@ async function createOrUpdateDishWithCurrentDate(dish, category) {
 
 async function createOrUpdateDish(dish, date, category) {
   const normalizedDate = new Date(date);
-  normalizedDate.setHours(0, 0, 0, 0); // Normalize the date to midnight
+  normalizedDate.setHours(0, 0, 0, 0);
 
   const existingDish = await Dish.findOne({
     name: dish.name,
-    date: normalizedDate, // Use both name and normalized date for uniqueness
+    date: normalizedDate,
   });
 
   if (!existingDish) {
@@ -83,7 +83,7 @@ async function createOrUpdateDish(dish, date, category) {
 async function parseDish(dish, category, date) {
   const uniqueId = uuidv4();
   const normalizedDate = new Date(date);
-  normalizedDate.setHours(0, 0, 0, 0); // Normalize the date to midnight
+  normalizedDate.setHours(0, 0, 0, 0);
 
   try {
     await Dish.create({
@@ -104,11 +104,9 @@ async function parseDish(dish, category, date) {
 }
 
 async function fetchDishesFromToday() {
-  // Get today's date at midnight
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // Get tomorrow's date at midnight
   const tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
 

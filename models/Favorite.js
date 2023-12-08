@@ -8,6 +8,11 @@ const favoriteSchema = new Schema(
       ref: "User",
       required: true,
     },
+    guildId: {
+      type: String,
+      ref: "Guild",
+      required: true,
+    },
     dishId: {
       type: String,
       ref: "Dish",
@@ -21,6 +26,33 @@ const favoriteSchema = new Schema(
 
 const Favorite = mongoose.model("Favorite", favoriteSchema);
 
+async function createOrUpdateFavorite(userId, guildId, dishId) {
+  const existingFav = await Favorite.findOne({
+    userId: userId,
+    guildId: guildId,
+    dishId: dishId,
+  });
+
+  if (!existingFav) {
+    try {
+      await Favorite.create({
+        userId: userId,
+        guildId: guildId,
+        dishId: dishId,
+      });
+      console.log(`Fav created User: ${userId} Dish: ${dishId}`);
+    } catch (err) {
+      console.error(
+        `Could not create Fav User: ${userId}: Dish: ${dishId}: `,
+        err
+      );
+    }
+  } else {
+    console.log("Fav already exists");
+  }
+}
+
 module.exports = {
   Favorite,
+  createOrUpdateFavorite,
 };

@@ -32,7 +32,7 @@ async function fetchAndSaveDishes() {
         url,
         new URLSearchParams({
           resources_id: "527",
-          date: "2023-11-21", // Datum
+          date: "2023-11-23", // Datum
         }),
         {
           headers: {
