@@ -1,27 +1,35 @@
-const { Users } = require('../dbObjects');
+const axios = require("axios");
+require("dotenv").config();
 
-async function addBalance(id, amount, currency) {
-    const user = currency.get(id);
-    console.log('using addBalance');
+async function createDishPictureDalle(dishName) {
+  try {
+    const prompt = `Generate a picture of ${dishName}.`;
+    const response = await axios.post(
+      "https://api.openai.com/v1/images/generations",
+      {
+        prompt: prompt,
+        n: 1,
+        size: "256x256",
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.openAIAPI}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    if (user) {
-        user.balance += Number(amount);
-        return user.save();
-    }
+    // Handling the response according to the format provided by OpenAI
+    console.log(response.data);
+    const picture = response.data; // Adjust this according to the actual response structure
 
-    const newUser = await Users.create({ user_id: id, balance: amount });
-    currency.set(id, newUser);
-
-    return newUser;
-}
-
-function getBalance(id, currency) {
-    console.log('using getBalance');
-    const user = currency.get(id);
-    return user ? user.balance : 0;
+    return picture;
+  } catch (error) {
+    console.error("Error generating dish picture:", error);
+    throw error;
+  }
 }
 
 module.exports = {
-    addBalance,
-    getBalance
+  createDishPictureDalle,
 };
