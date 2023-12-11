@@ -19,11 +19,9 @@ async function createDishPictureDalle(dishName) {
       }
     );
 
-    // Handling the response according to the format provided by OpenAI
-    console.log(response.data);
-    const picture = response.data; // Adjust this according to the actual response structure
+    const picture = response.data;
 
-    return picture;
+    return picture.data[0].url;
   } catch (error) {
     console.error("Error generating dish picture:", error);
     throw error;
