@@ -18,6 +18,7 @@ module.exports = {
       await interaction.deferReply();
       const dishId = interaction.options.getString("dish_id");
       const userId = interaction.user.id;
+      const guildId = interaction.guild.id;
 
       const dishExists = await Dish.findOne({ id: dishId });
       if (!dishExists) {
@@ -33,7 +34,7 @@ module.exports = {
         return;
       }
 
-      await Favorite.create({ userId, dishId });
+      await Favorite.create({ userId, dishId, guildId });
 
       await interaction.editReply(
         `Gericht ${dishExists.name} wurde zu deinen Favoriten hinzugefügt.`

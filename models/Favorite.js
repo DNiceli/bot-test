@@ -52,7 +52,20 @@ async function createOrUpdateFavorite(userId, guildId, dishId) {
   }
 }
 
+getFavorites = async (userId, guildId) => {
+  const favorites = await Favorite.find({
+    userId: userId,
+    guildId: guildId,
+  });
+  if (!favorites) {
+    console.log("No favorites found");
+    return;
+  }
+  return favorites;
+};
+
 module.exports = {
   Favorite,
   createOrUpdateFavorite,
+  getFavorites,
 };
