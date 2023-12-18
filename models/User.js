@@ -3,8 +3,7 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
   {
-    discordId: {
-      // Unique identifier for the Discord user
+    userId: {
       type: String,
       required: true,
       unique: true,
