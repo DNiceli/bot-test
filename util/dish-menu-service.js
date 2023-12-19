@@ -74,13 +74,18 @@ async function createDishes(menu) {
       date: today,
       dishes: [],
     });
+  } else {
+    dailyMenu.dishes = dailyMenu.dishes.map((dishId) => dishId.toString());
   }
 
   for (const category of menu.keys()) {
     const dishes = menu.get(category);
     for (const dish of dishes) {
       const dishDocument = await createOrUpdateDish(dish, category);
-      dailyMenu.dishes.push(dishDocument._id);
+
+      if (!dailyMenu.dishes.includes(dishDocument._id.toString())) {
+        dailyMenu.dishes.push(dishDocument._id);
+      }
     }
   }
 
