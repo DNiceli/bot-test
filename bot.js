@@ -23,7 +23,7 @@ const client = new Client({
 
 client.once("ready", () => {
   console.log("Bot is online!");
-  fetchAndSaveDishes();
+  fetchAndSaveDishes(new Date().toISOString().split("T")[0]);
 });
 
 client.commands = new Collection();

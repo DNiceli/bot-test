@@ -4,7 +4,7 @@ const cheerio = require("cheerio");
 const Dish = require("../models/Dish.js");
 const Menu = require("../models/Dailymenu.js");
 
-async function fetchAndSaveDishes() {
+async function fetchAndSaveDishes(date) {
   try {
     const url = process.env.mensaUrl2;
     const menu = new Map();
@@ -13,7 +13,7 @@ async function fetchAndSaveDishes() {
         url,
         new URLSearchParams({
           resources_id: "527",
-          date: "2023-11-23", // Datum
+          date: date, // Datum
         }),
         {
           headers: {
@@ -65,32 +65,34 @@ async function fetchAndSaveDishes() {
   }
 }
 
-function createDishes(menu) {
+async function createDishes(menu) {
+  const today = new Date().toISOString().split("T")[0];
+  let dailyMenu = await Menu.findOne({ date: today });
+
+  if (!dailyMenu) {
+    dailyMenu = new Menu({
+      date: today,
+      dishes: [],
+    });
+  }
+
   for (const category of menu.keys()) {
     const dishes = menu.get(category);
     for (const dish of dishes) {
-      createOrUpdateDish(dish, category);
+      const dishDocument = await createOrUpdateDish(dish, category);
+      dailyMenu.dishes.push(dishDocument._id);
     }
   }
+
+  await dailyMenu.save();
+  console.log(`Menu for ${today} updated`);
 }
 
 async function createOrUpdateDish(dish, category) {
-  const existingDish = await Dish.findOne({
-    name: dish.name,
-  });
+  let existingDish = await Dish.findOne({ name: dish.name });
 
   if (!existingDish) {
-    await parseDish(dish, category)
-      .then(() => console.log("Dish created!"))
-      .catch((err) => console.error("Could not create dish:", err));
-  } else {
-    console.log("Dish already exists");
-  }
-}
-
-async function parseDish(dish, category) {
-  try {
-    await Dish.create({
+    existingDish = await Dish.create({
       name: dish.name,
       category: category,
       price: dish.price,
@@ -99,10 +101,12 @@ async function parseDish(dish, category) {
       h2o: dish.h2o,
       ampel: dish.ampel,
     });
-    console.log(`Dish ${dish.name} created successfully with ID ${dish._id}`);
-  } catch (err) {
-    console.error(`Could not create dish ${dish.name}:`, err);
+    console.log(`Dish created: ${existingDish.name}`);
+  } else {
+    console.log("Dish already exists");
   }
+
+  return existingDish;
 }
 
 async function createOrUpdateMenu(dish) {
