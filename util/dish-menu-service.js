@@ -39,13 +39,10 @@ async function fetchAndSaveDishes(date) {
                   .text()
                   .trim(),
                 allergens: $(meal)
-                  .find("div.kennz.ptr.toolt")
-                  .contents()
-                  .filter(function () {
-                    return this.type === "text";
-                  })
-                  .text()
-                  .trim(),
+                  .find("div.kennz.ptr.toolt table tr")
+                  .map((i, elem) => $(elem).find("td").eq(1).text().trim())
+                  .get()
+                  .join(", "),
                 ampel: $(meal).find("img.splIcon").attr("alt"),
                 h2o: $(meal)
                   .find("img[aria-describedby^='tooltip_H2O']")
@@ -115,7 +112,37 @@ async function createOrUpdateDish(dish, category) {
     });
     console.log(`Dish created: ${existingDish.name}`);
   } else {
-    console.log("Dish already exists");
+    let needsUpdate = false;
+
+    // Check and update fields if they have changed
+    if (existingDish.price !== dish.price) {
+      existingDish.price = dish.price;
+      needsUpdate = true;
+    }
+    if (existingDish.allergens !== dish.allergens) {
+      existingDish.allergens = dish.allergens;
+      needsUpdate = true;
+    }
+    if (existingDish.co2 !== dish.co2) {
+      existingDish.co2 = dish.co2;
+      needsUpdate = true;
+    }
+    if (existingDish.h2o !== dish.h2o) {
+      existingDish.h2o = dish.h2o;
+      needsUpdate = true;
+    }
+    if (existingDish.ampel !== dish.ampel) {
+      existingDish.ampel = dish.ampel;
+      needsUpdate = true;
+    }
+
+    // Save the updated dish if any changes were made
+    if (needsUpdate) {
+      await existingDish.save();
+      console.log(`Dish updated: ${existingDish.name}`);
+    } else {
+      console.log(`No updates needed for: ${existingDish.name}`);
+    }
   }
 
   return existingDish;
