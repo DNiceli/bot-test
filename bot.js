@@ -2,7 +2,10 @@ require("dotenv").config();
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("./dbInit.js");
-const { fetchAndSaveDishes } = require("./util/dish-menu-service.js");
+const {
+  fetchAndSaveDishes,
+  getTodaysMenu,
+} = require("./util/dish-menu-service.js");
 
 const {
   Client,

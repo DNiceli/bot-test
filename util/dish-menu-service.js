@@ -38,7 +38,14 @@ async function fetchAndSaveDishes(date) {
                   .find(".col-xs-12.col-md-3.text-right")
                   .text()
                   .trim(),
-                allergens: $(meal).attr("lang"),
+                allergens: $(meal)
+                  .find("div.kennz.ptr.toolt")
+                  .contents()
+                  .filter(function () {
+                    return this.type === "text";
+                  })
+                  .text()
+                  .trim(),
                 ampel: $(meal).find("img.splIcon").attr("alt"),
                 h2o: $(meal)
                   .find("img[aria-describedby^='tooltip_H2O']")
@@ -114,24 +121,23 @@ async function createOrUpdateDish(dish, category) {
   return existingDish;
 }
 
-async function createOrUpdateMenu(dish) {
-  const today = new Date().toISOString().split("T")[0];
-  const existingMenu = await Menu.findOne({ date: today });
+async function getTodaysMenu() {
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const dailyMenu = await Menu.findOne({ date: today }).populate("dishes");
+    if (!dailyMenu) {
+      console.log(`No menu found for ${today}`);
+      return [];
+    }
 
-  if (!existingMenu) {
-    const menu = new Menu({
-      date: today,
-      dishes: [dish],
-    });
-    await menu.save();
-    console.log(`Menu created for ${today}`);
-  } else {
-    existingMenu.dishes.push(dish);
-    await existingMenu.save();
-    console.log(`Dish added to existing menu for ${today}`);
+    return dailyMenu.dishes;
+  } catch (error) {
+    console.error("Error fetching today's menu:", error);
+    return [];
   }
 }
 
 module.exports = {
   fetchAndSaveDishes,
+  getTodaysMenu,
 };
