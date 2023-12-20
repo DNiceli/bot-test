@@ -37,6 +37,11 @@ const dishSchema = new Schema(
       required: true,
       default: "",
     },
+    imageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Image",
+      required: false,
+    },
   },
   {
     timestamps: true,

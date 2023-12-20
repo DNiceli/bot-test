@@ -20,13 +20,6 @@ module.exports = {
     await interaction.deferReply();
     const dishName = interaction.options.getString("dish");
 
-    cloudinary.config({
-      secure: true,
-      cloud_name: process.env.CLOUDINARY_NAME,
-      api_key: process.env.CLOUDINARY_KEY,
-      api_secret: process.env.CLOUDINARY_SECRET,
-    });
-
     console.log(cloudinary.config());
 
     const pictureUrl = await createDishPictureDalle(dishName);

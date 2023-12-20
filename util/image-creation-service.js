@@ -1,6 +1,14 @@
 const axios = require("axios");
 const cloudinary = require("cloudinary").v2;
+const Image = require("../models/Image.js");
 require("dotenv").config();
+
+cloudinary.config({
+  secure: true,
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
 
 async function createDishPictureDalle(dishName) {
   try {
@@ -42,13 +50,40 @@ const uploadImage = async (imagePath) => {
     // Upload the image
     const result = await cloudinary.uploader.upload(imagePath, options);
     console.log(result);
-    return result.public_id;
+    return result.url;
   } catch (error) {
     console.error(error);
   }
 };
 
-module.exports = {
-  createDishPictureDalle,
-  uploadImage,
-};
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function createUploadAndSaveDishPicture(dishName) {
+  let attempts = 0;
+  const maxAttempts = 2;
+
+  while (attempts < maxAttempts) {
+    try {
+      const imagePath = await createDishPictureDalle(dishName);
+      const imageUrl = await uploadImage(imagePath);
+      const image = new Image({ url: imageUrl });
+      await image.save();
+      return image._id;
+    } catch (error) {
+      console.error("Error creating dish picture:", error);
+      attempts++;
+      if (attempts < maxAttempts) {
+        console.log(
+          `Retrying in 60 seconds... (Attempt ${attempts} of ${maxAttempts})`
+        );
+        await sleep(60000); // Wait for 60 seconds before retrying
+      } else {
+        throw error;
+      }
+    }
+  }
+}
+
+module.exports = createUploadAndSaveDishPicture;

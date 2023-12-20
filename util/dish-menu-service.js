@@ -3,6 +3,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const Dish = require("../models/Dish.js");
 const Menu = require("../models/Dailymenu.js");
+const createUploadAndSaveDishPicture = require("./image-creation-service");
 
 async function fetchAndSaveDishes(date) {
   try {
@@ -46,10 +47,18 @@ async function fetchAndSaveDishes(date) {
                 ampel: $(meal).find("img.splIcon").attr("alt"),
                 h2o: $(meal)
                   .find("img[aria-describedby^='tooltip_H2O']")
-                  .attr("alt"),
+                  .parent()
+                  .find(".shocl_content")
+                  .last()
+                  .text()
+                  .trim(),
                 co2: $(meal)
                   .find("img[aria-describedby^='tooltip_CO2']")
-                  .attr("alt"),
+                  .parent()
+                  .find(".shocl_content")
+                  .first()
+                  .text()
+                  .trim(),
               };
               console.log("allergens " + dish.allergens);
               dishes.push(dish);
@@ -101,6 +110,7 @@ async function createOrUpdateDish(dish, category) {
   let existingDish = await Dish.findOne({ name: dish.name });
 
   if (!existingDish) {
+    const imageID = await createUploadAndSaveDishPicture(dish.name);
     existingDish = await Dish.create({
       name: dish.name,
       category: category,
@@ -109,34 +119,38 @@ async function createOrUpdateDish(dish, category) {
       co2: dish.co2,
       h2o: dish.h2o,
       ampel: dish.ampel,
+      imageId: imageID,
     });
     console.log(`Dish created: ${existingDish.name}`);
   } else {
     let needsUpdate = false;
 
-    // Check and update fields if they have changed
     if (existingDish.price !== dish.price) {
       existingDish.price = dish.price;
       needsUpdate = true;
+      console.log("Updategrund: price ");
     }
     if (existingDish.allergens !== dish.allergens) {
       existingDish.allergens = dish.allergens;
       needsUpdate = true;
+      console.log("Updategrund: allergens ");
     }
     if (existingDish.co2 !== dish.co2) {
       existingDish.co2 = dish.co2;
       needsUpdate = true;
+      console.log("Updategrund: co2 " + dish.co2);
     }
     if (existingDish.h2o !== dish.h2o) {
       existingDish.h2o = dish.h2o;
       needsUpdate = true;
+      console.log("Updategrund: h2o " + dish.h2o);
     }
     if (existingDish.ampel !== dish.ampel) {
       existingDish.ampel = dish.ampel;
       needsUpdate = true;
+      console.log("Updategrund: ampel ");
     }
 
-    // Save the updated dish if any changes were made
     if (needsUpdate) {
       await existingDish.save();
       console.log(`Dish updated: ${existingDish.name}`);
