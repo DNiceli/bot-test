@@ -33,6 +33,38 @@ async function fetchAndSaveDishes(date) {
           $(groupWrapper)
             .find(".row.splMeal")
             .each(async (_, meal) => {
+              let dietType = "keine Angabe"; // Standardwert
+              const dietInfo = $(meal)
+                .find("img.splIcon")
+                .map((i, elem) => {
+                  const altText = $(elem).attr("alt");
+                  if (altText.includes("Vegan")) {
+                    return "vegan";
+                  } else if (altText.includes("Vegetarisch")) {
+                    return "vegetarisch";
+                  }
+                  return null;
+                })
+                .get();
+
+              if (dietInfo.includes("vegan")) {
+                dietType = "vegan";
+              } else if (dietInfo.includes("vegetarisch")) {
+                dietType = "vegetarisch";
+              }
+
+              let ampelText = $(meal).find("img.splIcon").attr("alt");
+
+              let ampelColor;
+              if (ampelText.includes("Grüner")) {
+                ampelColor = "Grün";
+              } else if (ampelText.includes("Roter")) {
+                ampelColor = "Rot";
+              } else if (ampelText.includes("Gelber")) {
+                ampelColor = "Gelb";
+              } else {
+                ampelColor = "Unbekannt";
+              }
               const dish = {
                 name: $(meal).find(".col-xs-6.col-md-5 > .bold").text().trim(),
                 price: $(meal)
@@ -44,21 +76,24 @@ async function fetchAndSaveDishes(date) {
                   .map((i, elem) => $(elem).find("td").eq(1).text().trim())
                   .get()
                   .join(", "),
-                ampel: $(meal).find("img.splIcon").attr("alt"),
+                ampel: ampelColor,
                 h2o: $(meal)
                   .find("img[aria-describedby^='tooltip_H2O']")
                   .parent()
                   .find(".shocl_content")
                   .last()
                   .text()
-                  .trim(),
+                  .trim()
+                  .split("Wasserverbrauch")[0],
                 co2: $(meal)
                   .find("img[aria-describedby^='tooltip_CO2']")
                   .parent()
                   .find(".shocl_content")
                   .first()
                   .text()
-                  .trim(),
+                  .trim()
+                  .split("CO2")[0],
+                dietType: dietType,
               };
               console.log("allergens " + dish.allergens);
               dishes.push(dish);
@@ -120,6 +155,7 @@ async function createOrUpdateDish(dish, category) {
       h2o: dish.h2o,
       ampel: dish.ampel,
       imageId: imageID,
+      dietType: dish.dietType,
     });
     console.log(`Dish created: ${existingDish.name}`);
   } else {
@@ -148,7 +184,12 @@ async function createOrUpdateDish(dish, category) {
     if (existingDish.ampel !== dish.ampel) {
       existingDish.ampel = dish.ampel;
       needsUpdate = true;
-      console.log("Updategrund: ampel ");
+      console.log("Updategrund: ampel" + dish.ampel);
+    }
+    if (existingDish.dietType !== dish.dietType) {
+      existingDish.dietType = dish.dietType;
+      needsUpdate = true;
+      console.log("Updategrund: diet" + dish.dietType);
     }
 
     if (needsUpdate) {

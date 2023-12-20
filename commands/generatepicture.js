@@ -4,7 +4,6 @@ const {
   createDishPictureDalle,
   uploadImage,
 } = require("../util/image-creation-service");
-require("dotenv").config();
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,8 +18,6 @@ module.exports = {
   async execute(interaction) {
     await interaction.deferReply();
     const dishName = interaction.options.getString("dish");
-
-    console.log(cloudinary.config());
 
     const pictureUrl = await createDishPictureDalle(dishName);
 

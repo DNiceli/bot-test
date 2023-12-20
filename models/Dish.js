@@ -42,6 +42,12 @@ const dishSchema = new Schema(
       ref: "Image",
       required: false,
     },
+    dietType: {
+      type: String,
+      required: true,
+      enum: ["vegan", "vegetarisch", "keine Angabe"],
+      default: "keine Angabe",
+    },
   },
   {
     timestamps: true,
