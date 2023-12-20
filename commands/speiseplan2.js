@@ -172,8 +172,8 @@ async function generateMenuCard(dish) {
           position: relative;
         }
         .image-placeholder {
-          width: 60px;
-          height: 60px;
+          width: 80px;
+          height: 80px;
           background-color: #CCCCCC;
           position: absolute;
           top: 20px;
@@ -183,25 +183,25 @@ async function generateMenuCard(dish) {
           justify-content: center;
         }
         .name {
-          font-size: 18px;
+          font-size: 17px;
           font-weight: bold;
           color: #333333;
           position: absolute;
           top: 20px;
-          left: 100px;
+          left: 120px;
         }
         .price {
           font-size: 14px;
           color: #333333;
           position: absolute;
-          top: 60px;
-          left: 100px;
+          top: 120px;
+          left: 20px;
         }
         .allergens {
           font-size: 10px;
           color: #333333;
           position: absolute;
-          top: 120px;
+          top: 180px;
           left: 20px;
         }
       </style>
@@ -210,8 +210,8 @@ async function generateMenuCard(dish) {
     <div class="image-placeholder">
     <img src="${url}" alt="Dish Image" style="width:100%; height:100%;"></div>
       <div class="name">${dish.name}</div>
-      <div class="price">Price: ${dish.price}</div>
-      <div class="allergens">Allergens: ${dish.allergens}</div>
+      <div class="price">Preis: ${dish.price}</div>
+      <div class="allergens">Allergene: ${dish.allergens}</div>
     </body>
   </html>`;
 
