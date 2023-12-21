@@ -2,7 +2,6 @@ require("dotenv").config();
 const sharp = require("sharp");
 const puppeteer = require("puppeteer");
 const { SlashCommandBuilder } = require("discord.js");
-const Dish = require("../models/Dish.js");
 const Favorite = require("../models/Favorite.js");
 const Menu = require("../models/Dailymenu.js");
 
@@ -100,13 +99,15 @@ module.exports = {
           }
 
           const dish = menuImgs[currentCategory][currentIndex];
-
-          const newImg = dish.image;
-          await message.edit({
-            content: "Here's the menu card:",
-            files: [newImg],
-          });
-
+          if (!dish) {
+            console.log("No dish found");
+          } else {
+            const newImg = dish.image;
+            await message.edit({
+              content: "Here's the menu card:",
+              files: [newImg],
+            });
+          }
           await reaction.users.remove(interaction.user.id);
         });
 
