@@ -40,10 +40,12 @@ async function createOrUpdateFavorite(userId, guildId, dishId) {
         guildId: guildId,
         dishId: dishId,
       });
-      console.log(`Fav created User: ${userId} Dish: ${dishId}`);
+      console.log(
+        `Fav created User: ${userId} Dish: ${dishId} Guild: ${guildId}`
+      );
     } catch (err) {
       console.error(
-        `Could not create Fav User: ${userId}: Dish: ${dishId}: `,
+        `Could not create Fav User: ${userId}: Dish: ${dishId} Guild: ${guildId}`,
         err
       );
     }
@@ -52,10 +54,9 @@ async function createOrUpdateFavorite(userId, guildId, dishId) {
   }
 }
 
-getFavorites = async (userId, guildId) => {
+getFavorites = async (userId) => {
   const favorites = await Favorite.find({
     userId: userId,
-    guildId: guildId,
   });
   if (!favorites) {
     console.log("No favorites found");

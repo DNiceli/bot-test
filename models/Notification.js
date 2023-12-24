@@ -5,10 +5,9 @@ const notificationSchema = new Schema(
   {
     userId: {
       type: String,
-      ref: "User",
       required: true,
     },
-    notifyOnFavoriteDishAvailability: {
+    notification: {
       type: Boolean,
       default: false,
     },
@@ -20,6 +19,4 @@ const notificationSchema = new Schema(
 
 const Notification = mongoose.model("Notification", notificationSchema);
 
-module.exports = {
-  Notification,
-};
+module.exports = Notification;

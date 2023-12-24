@@ -80,7 +80,6 @@ module.exports = {
           const selectedCategory = Object.keys(categoryEmojis).find(
             (category) => categoryEmojis[category] === reactedEmoji
           );
-
           if (selectedCategory) {
             currentCategory = selectedCategory;
             currentIndex = 0;
@@ -93,12 +92,11 @@ module.exports = {
               (currentIndex + 1) % menuImgs[currentCategory].length;
           } else if (reactedEmoji === star) {
             if (!interaction.guild) return; // Returns as there is no guild
+            var dishId = menuImgs[currentCategory][currentIndex].id;
             var guild = interaction.guild.id;
             var userID = interaction.user.id;
-            var dishId = menuImgs[currentCategory][currentIndex].id;
-            Favorite.createOrUpdateFavorite(guild, userID, dishId);
+            Favorite.createOrUpdateFavorite(userID, guild, dishId);
           }
-
           const dish = menuImgs[currentCategory][currentIndex];
           if (!dish) {
             console.log("No dish found");

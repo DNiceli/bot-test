@@ -3,6 +3,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("./dbInit.js");
 const { fetchAndSaveDishes } = require("./util/dish-menu-service.js");
+const { notify } = require("./util/notification-service.js");
+const cron = require("node-cron");
 
 const {
   Client,
@@ -66,3 +68,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.login(process.env.BOT_TOKEN);
+
+cron.schedule("0 9 * * *", async () => {
+  console.log("running a task every day at 9am");
+  await notify(client);
+});
