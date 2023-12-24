@@ -14,7 +14,7 @@ async function fetchAndSaveDishes(date) {
         url,
         new URLSearchParams({
           resources_id: "527",
-          date: date, // "YYYY-MM-DD"
+          date: "2023-12-20", //date, // "YYYY-MM-DD"
         }),
         {
           headers: {
@@ -205,7 +205,8 @@ async function createOrUpdateDish(dish, category) {
 
 async function getTodaysMenu() {
   try {
-    const today = new Date().toISOString().split("T")[0];
+    //const today = new Date().toISOString().split("T")[0];
+    const today = "2023-12-20";
     const dailyMenu = await Menu.findOne({ date: today }).populate("dishes");
     if (!dailyMenu) {
       console.log(`No menu found for ${today}`);

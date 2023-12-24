@@ -14,7 +14,7 @@ const favoriteSchema = new Schema(
       required: true,
     },
     dishId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Dish",
       required: true,
     },

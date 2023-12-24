@@ -4,8 +4,6 @@ const Favorite = require("../models/Favorite.js");
 const Menu = require("../models/Dailymenu.js");
 const { generateMenuCard } = require("../util/speiseplan-util.js");
 
-const arrowLeft = "\u2B05";
-const arrowRight = "\u27A1";
 const star = "\u2b50";
 
 const categoryEmojis = {
@@ -30,8 +28,8 @@ let menuImgs = {
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("speiseplan2")
-    .setDescription("sieht speiseplan in dishcard mit buttons"),
+    .setName("speiseplan3")
+    .setDescription("sieht speiseplan multi dishcards"),
   async execute(interaction) {
     try {
       await interaction.deferReply();
@@ -50,22 +48,17 @@ module.exports = {
           menuImgs[dishImgObj.category].push(dishImgObj);
         }
 
-        let img = menuImgs["Desserts"][0].image;
         const message = await interaction.editReply({
           content: "Here's the menu card:",
-          files: [img],
+          files: [menuImgs["Desserts"][0].image], // Default to showing first dessert
         });
 
         for (const category of Object.keys(menuImgs)) {
-          console.log(category);
           await message.react(categoryEmojis[category]);
         }
 
-        await message.react(arrowLeft);
-        await message.react(arrowRight);
         await message.react(star);
 
-        // Create the message collector to listen for reactions of users
         const filter = (reaction, user) => user.id === interaction.user.id;
         const collector = message.createReactionCollector({
           filter,
@@ -73,7 +66,6 @@ module.exports = {
         });
 
         let currentCategory = "Desserts";
-        let currentIndex = 0;
 
         collector.on("collect", async (reaction, user) => {
           const reactedEmoji = reaction.emoji.name;
@@ -81,39 +73,27 @@ module.exports = {
             (category) => categoryEmojis[category] === reactedEmoji
           );
 
-          if (selectedCategory) {
+          if (selectedCategory && menuImgs[selectedCategory].length > 0) {
             currentCategory = selectedCategory;
-            currentIndex = 0;
-          } else if (reactedEmoji === arrowLeft) {
-            currentIndex =
-              (currentIndex - 1 + menuImgs[currentCategory].length) %
-              menuImgs[currentCategory].length;
-          } else if (reactedEmoji === arrowRight) {
-            currentIndex =
-              (currentIndex + 1) % menuImgs[currentCategory].length;
-          } else if (reactedEmoji === star) {
-            if (!interaction.guild) return; // Returns as there is no guild
-            var guild = interaction.guild.id;
-            var userID = interaction.user.id;
-            var dishId = menuImgs[currentCategory][currentIndex].id;
-            Favorite.createOrUpdateFavorite(guild, userID, dishId);
-          }
-
-          const dish = menuImgs[currentCategory][currentIndex];
-          if (!dish) {
-            console.log("No dish found");
-          } else {
-            const newImg = dish.image;
+            const categoryImages = menuImgs[currentCategory].map(
+              (dish) => dish.image
+            );
             await message.edit({
-              content: "Here's the menu card:",
-              files: [newImg],
+              content: `Here's the menu for ${currentCategory}:`,
+              files: categoryImages,
             });
+          } else if (reactedEmoji === star) {
+            // Logic for adding a dish to favorites
+            if (!interaction.guild) return;
+            const guildId = interaction.guild.id;
+            const userId = interaction.user.id;
+            const dishId = menuImgs[currentCategory][0].id; // TODO: Default is first image, bessere Lösung?
+            Favorite.createOrUpdateFavorite(guildId, userId, dishId);
           }
           await reaction.users.remove(interaction.user.id);
         });
 
         collector.on("end", () => {
-          // Remove reactions when the collector ends
           message.reactions.removeAll();
         });
       }
