@@ -205,8 +205,10 @@ async function createOrUpdateDish(dish, category) {
 
 async function getTodaysMenu() {
   try {
-    //const today = new Date().toISOString().split("T")[0];
-    const today = "2023-12-20";
+    let today = new Date().toISOString().split("T")[0];
+    if (process.env.OVERRIDE_DATE === "true") {
+      today = "2023-12-20";
+    }
     const dailyMenu = await Menu.findOne({ date: today }).populate("dishes");
     if (!dailyMenu) {
       console.log(`No menu found for ${today}`);
