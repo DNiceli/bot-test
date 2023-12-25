@@ -8,7 +8,6 @@ async function notify(client) {
   try {
     const dailyMenu = await getTodaysMenu();
     const usersToNotify = await Notification.find({ notification: true });
-    console.log("Users:" + usersToNotify);
 
     for (const user of usersToNotify) {
       const favorites = await getFavorites(user.userId);
@@ -16,23 +15,16 @@ async function notify(client) {
         console.log("No favorites found");
         return;
       }
-      console.log("Favorites:" + favorites);
       const favoriteDishes = dailyMenu.filter((dish) =>
-        favorites.some((fav) => fav.dishId.equals(dish._id))
+        favorites.some((fav) => fav.dishId.toString() === dish._id.toString())
       );
-      console.log(user.userId);
-      console.log(favoriteDishes);
 
       if (favoriteDishes.length > 0) {
         let query = "";
         for (const dish of favoriteDishes) {
           query += `${dish.name} `;
         }
-        console.log("query" + query);
-        client.users.send(
-          user.userId,
-          query + "is/are available today! Check the menu for more details."
-        );
+        client.users.send(user.userId, query + " Favorite alarm!");
       }
     }
   } catch (err) {
