@@ -12,7 +12,16 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    // Not sure what else i need yet
+    guildId: {
+      type: String,
+      required: true,
+    },
+    allergens: [
+      {
+        number: { type: String },
+        description: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -20,3 +29,5 @@ const userSchema = new Schema(
 );
 
 const User = mongoose.model("User", userSchema);
+
+module.exports = User;

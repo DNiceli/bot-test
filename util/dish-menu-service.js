@@ -3,6 +3,7 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const Dish = require("../models/Dish.js");
 const Menu = require("../models/Dailymenu.js");
+const Allergen = require("../models/Allergen.js");
 const createUploadAndSaveDishPicture = require("./image-creation-service");
 
 async function fetchAndSaveDishes(date) {
@@ -110,6 +111,68 @@ async function fetchAndSaveDishes(date) {
     return menu;
   } catch (error) {
     console.error(error);
+  }
+}
+
+async function fetchAndSaveAllergens(date) {
+  try {
+    const url = process.env.mensaUrl2;
+    const allergens = [];
+
+    const response = await axios.post(
+      url,
+      new URLSearchParams({
+        resources_id: "527",
+        date: "2023-12-20", // oder date
+      }),
+      {
+        headers: {
+          "x-requested-with": "XMLHttpRequest",
+        },
+      }
+    );
+
+    const html = response.data;
+    const $ = cheerio.load(html);
+
+    $("input.itemkennz").each((_, element) => {
+      const id = $(element).attr("id").replace("stoff-", "");
+      let description =
+        $(element).next("span").attr("title") ||
+        $(element).parent().text().trim();
+
+      description = description.replace(/^\(\d+[a-zA-Z]?\)\s*/, ""); //regex um die Nummerierung mit ggf einem Buchstaben zu entfernen
+
+      const allergen = {
+        nr: id,
+        beschreibung: description,
+      };
+      allergens.push(allergen);
+    });
+
+    for (const allergenData of allergens) {
+      const existingAllergen = await Allergen.findOne({
+        number: allergenData.nr,
+      });
+
+      if (existingAllergen) {
+        if (existingAllergen.description !== allergenData.beschreibung) {
+          existingAllergen.description = allergenData.beschreibung;
+          await existingAllergen.save();
+        }
+      } else {
+        const newAllergen = new Allergen({
+          number: allergenData.nr,
+          description: allergenData.beschreibung,
+        });
+        await newAllergen.save();
+      }
+    }
+    console.log(allergens);
+    return allergens;
+  } catch (error) {
+    console.error("Fehler beim Abrufen der Allergene:", error);
+    throw error;
   }
 }
 
@@ -225,4 +288,5 @@ async function getTodaysMenu() {
 module.exports = {
   fetchAndSaveDishes,
   getTodaysMenu,
+  fetchAndSaveAllergens,
 };
