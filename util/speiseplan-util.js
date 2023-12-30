@@ -35,6 +35,12 @@ async function generateMenuCard(dish) {
 
   let dishImage = await dish.populate("imageId");
   let url = dishImage.imageId.url;
+  let allergens = "";
+  if (dish.allergens.length > 0) {
+    allergens = dish.allergens
+      .map((allergen) => allergen.description)
+      .join(", ");
+  }
 
   const htmlTemplate = `
     <!DOCTYPE html>
@@ -90,7 +96,7 @@ async function generateMenuCard(dish) {
       <img src="${url}" alt="Dish Image" style="width:100%; height:100%;"></div>
         <div class="name">${dish.name}</div>
         <div class="price">Preis: ${dish.price}</div>
-        <div class="allergens">Allergene: ${dish.allergens}</div>
+        <div class="allergens">Allergene: ${allergens}</div>
       </body>
     </html>`;
 

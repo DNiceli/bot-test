@@ -18,10 +18,12 @@ const dishSchema = new Schema(
       required: true,
       default: "",
     },
-    allergens: {
-      type: String,
-      default: "",
-    },
+    allergens: [
+      {
+        number: { type: String },
+        description: { type: String },
+      },
+    ],
     co2: {
       type: String,
       required: false,

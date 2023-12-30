@@ -10,6 +10,10 @@ async function fetchAndSaveDishes(date) {
   try {
     const url = process.env.mensaUrl2;
     const menu = new Map();
+    let allergens = await Allergen.find();
+    if (!allergens) {
+      allergens = await fetchAndSaveAllergens();
+    }
     await axios
       .post(
         url,
@@ -76,7 +80,10 @@ async function fetchAndSaveDishes(date) {
                   .find("div.kennz.ptr.toolt table tr")
                   .map((i, elem) => $(elem).find("td").eq(1).text().trim())
                   .get()
-                  .join(", "),
+                  .map((allergenDesc) =>
+                    allergenLookup(allergenDesc, allergens)
+                  )
+                  .filter((allergen) => allergen !== null),
                 ampel: ampelColor,
                 h2o: $(meal)
                   .find("img[aria-describedby^='tooltip_H2O']")
@@ -96,6 +103,9 @@ async function fetchAndSaveDishes(date) {
                   .split("CO2")[0],
                 dietType: dietType,
               };
+              if (!dish.allergens) {
+                dish.allergens = [];
+              }
               console.log("allergens " + dish.allergens);
               dishes.push(dish);
             });
@@ -113,6 +123,12 @@ async function fetchAndSaveDishes(date) {
     console.error(error);
   }
 }
+
+const allergenLookup = (description, allergens) => {
+  return (
+    allergens.find((allergen) => allergen.description === description) || null
+  );
+};
 
 async function fetchAndSaveAllergens(date) {
   try {
