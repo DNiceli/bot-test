@@ -20,6 +20,7 @@ const userSchema = new Schema(
       {
         number: { type: String },
         description: { type: String },
+        _id: false,
       },
     ],
   },

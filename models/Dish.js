@@ -22,6 +22,7 @@ const dishSchema = new Schema(
       {
         number: { type: String },
         description: { type: String },
+        _id: false,
       },
     ],
     co2: {

@@ -28,8 +28,8 @@ const client = new Client({
 
 client.once("ready", () => {
   console.log("Bot is online!");
-  fetchAndSaveDishes(new Date().toISOString().split("T")[0]);
-  fetchAndSaveAllergens(new Date().toISOString().split("T")[0]);
+  //fetchAndSaveDishes(new Date().toISOString().split("T")[0]);
+  //fetchAndSaveAllergens(new Date().toISOString().split("T")[0]);
 });
 
 client.commands = new Collection();
