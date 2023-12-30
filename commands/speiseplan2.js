@@ -122,7 +122,7 @@ module.exports = {
           if (!interaction.guild) return; // Returns as there is no guild
           var dishId = menuImgs[currentCategory][currentIndex].id;
           var guild = interaction.guild.id;
-          var userID = interaction.user.id;
+          var userID = user.id;
           Favorite.createOrUpdateFavorite(userID, guild, dishId);
         }
         const dish = menuImgs[currentCategory][currentIndex];
@@ -141,6 +141,7 @@ module.exports = {
       collector.on("end", () => {
         // Remove reactions when the collector ends
         message.reactions.removeAll();
+        message.delete();
       });
     } catch (error) {
       console.error(error);
