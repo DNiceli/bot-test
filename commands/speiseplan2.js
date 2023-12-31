@@ -4,11 +4,9 @@ const Favorite = require("../models/Favorite.js");
 const Menu = require("../models/Dailymenu.js");
 const { generateMenuCard } = require("../util/speiseplan-util.js");
 const User = require("../models/User.js");
-
 const arrowLeft = "\u2B05";
 const arrowRight = "\u27A1";
 const star = "\u2b50";
-
 const categoryEmojis = {
   Vorspeisen: "\uD83C\uDF4F",
   Salate: "\uD83E\uDD57",
@@ -18,7 +16,6 @@ const categoryEmojis = {
   Aktionen: "\uD83D\uDC51",
   Beilagen: "\uD83C\uDF5A",
 };
-
 let menuImgs = {
   Vorspeisen: [],
   Salate: [],
@@ -149,7 +146,7 @@ module.exports = {
       });
     } catch (error) {
       console.error(error);
-      await interaction.editReply("ERROR ERROR, siehe console");
+      await interaction.editReply("Es gab einen Fehler bei der Ausführung.");
     }
   },
 };

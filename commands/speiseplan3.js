@@ -99,7 +99,7 @@ module.exports = {
       }
     } catch (error) {
       console.error(error);
-      await interaction.editReply("ERROR ERROR, siehe console");
+      await interaction.editReply("Es gab einen Fehler bei der Ausführung.");
     }
   },
 };
