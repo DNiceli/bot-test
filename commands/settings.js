@@ -31,8 +31,8 @@ module.exports = {
         content: "Adjust the settings here:",
         components: selectMenus,
         fetchReply: true,
+        ephemeral: true,
       });
-
       const response = await interaction.fetchReply();
       const collector = response.createMessageComponentCollector({
         filter: (i) =>
