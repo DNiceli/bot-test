@@ -108,21 +108,26 @@ module.exports = {
         const selectedCategory = Object.keys(categoryEmojis).find(
           (category) => categoryEmojis[category] === reactedEmoji
         );
-        if (selectedCategory) {
-          currentCategory = selectedCategory;
-          currentIndex = 0;
-        } else if (reactedEmoji === arrowLeft) {
-          currentIndex =
-            (currentIndex - 1 + menuImgs[currentCategory].length) %
-            menuImgs[currentCategory].length;
-        } else if (reactedEmoji === arrowRight) {
-          currentIndex = (currentIndex + 1) % menuImgs[currentCategory].length;
-        } else if (reactedEmoji === star) {
-          if (!interaction.guild) return; // Returns as there is no guild
-          var dishId = menuImgs[currentCategory][currentIndex].id;
-          var guild = interaction.guild.id;
-          var userID = user.id;
-          Favorite.createOrUpdateFavorite(userID, guild, dishId);
+
+        switch (reactedEmoji) {
+          case arrowLeft:
+            currentIndex =
+              (currentIndex + 1) % menuImgs[currentCategory].length;
+            break;
+          case arrowRight:
+            currentIndex =
+              (currentIndex + 1) % menuImgs[currentCategory].length;
+            break;
+          case star:
+            if (!interaction.guild) return; // Returns as there is no guild
+            var dishId = menuImgs[currentCategory][currentIndex].id;
+            var guild = interaction.guild.id;
+            var userID = user.id;
+            Favorite.createOrUpdateFavorite(userID, guild, dishId);
+            break;
+          default:
+            currentCategory = selectedCategory;
+            currentIndex = 0;
         }
         const dish = menuImgs[currentCategory][currentIndex];
         if (!dish) {
