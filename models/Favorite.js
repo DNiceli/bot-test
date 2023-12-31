@@ -65,8 +65,22 @@ getFavorites = async (userId) => {
   return favorites;
 };
 
+async function getMostFavoritedDishes() {
+  try {
+    return await Favorite.aggregate([
+      {
+        $group: { _id: "$dishId", totalQuantity: { $count: {} } },
+      },
+    ]);
+  } catch (error) {
+    console.error("Error fetching most favorited dishes:", error);
+    return [];
+  }
+}
+
 module.exports = {
   Favorite,
   createOrUpdateFavorite,
   getFavorites,
+  getMostFavoritedDishes,
 };

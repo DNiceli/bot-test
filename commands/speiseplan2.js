@@ -4,7 +4,6 @@ const Favorite = require("../models/Favorite.js");
 const Menu = require("../models/Dailymenu.js");
 const { generateMenuCard } = require("../util/speiseplan-util.js");
 const User = require("../models/User.js");
-const { find } = require("../models/Dish.js");
 
 const arrowLeft = "\u2B05";
 const arrowRight = "\u27A1";
