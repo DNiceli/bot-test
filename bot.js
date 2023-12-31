@@ -15,6 +15,8 @@ const {
   Events,
   GatewayIntentBits,
   codeBlock,
+  ComponentType,
+  Partials,
 } = require("discord.js");
 const client = new Client({
   intents: [
@@ -23,7 +25,9 @@ const client = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.DirectMessages,
   ],
+  partials: [Partials.Channel],
 });
 
 client.once("ready", () => {
@@ -77,3 +81,19 @@ cron.schedule("0 9 * * *", async () => {
   console.log("running a task every day at 9am");
   await notify(client);
 });
+
+client.on(Events.MessageCreate, async (message) => {
+  //testbereich
+  if (message.author.bot) return;
+  if (message.author.id !== "130787506441420801") return;
+  if (message.content === "stats") {
+    const count = await getGuildCount();
+    console.log(count);
+    message.reply("Anzahl an Servern: " + count);
+  }
+});
+
+async function getGuildCount() {
+  const guilds = await client.guilds.fetch();
+  return guilds.size;
+}

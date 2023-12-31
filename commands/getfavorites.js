@@ -1,8 +1,7 @@
 require("dotenv").config();
 const { SlashCommandBuilder } = require("discord.js");
-const { Favorite } = require("../models/Favorite.js");
+const { getFavorites } = require("../models/Favorite.js");
 const { Dish } = require("../models/Dish.js");
-const { get } = require("mongoose");
 
 module.exports = {
   data: new SlashCommandBuilder()
