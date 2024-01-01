@@ -101,7 +101,6 @@ async function generateMenuCard(dish) {
 
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  console.log("pop");
   await page.setContent(htmlTemplate);
   const pngBuffer = await page.screenshot({
     type: "png",
@@ -114,24 +113,14 @@ async function generateMenuCard(dish) {
     name: dish.name,
     category: dish.category,
   };
-  console.log("pop");
   return returnObject;
 }
 
-function uploadAndAddDishcardUrlToDish(dish) {
-  return generateMenuCard(dish)
-    .then((dishCardObject) => {
-      uploadImageBuffer(dishCardObject.image)
-        .then((result) => {
-          dish.dishCard = result.url;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+async function uploadAndAddDishcardUrlToDish(dish) {
+  let dishCardObj = await generateMenuCard(dish);
+  let dishCard = await uploadImageBuffer(dishCardObj.image);
+  dish.dishCard = dishCard.url;
+  return dish;
 }
 
 module.exports = {

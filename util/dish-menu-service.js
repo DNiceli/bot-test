@@ -178,7 +178,6 @@ async function fetchAndSaveAllergens(date) {
         await newAllergen.save();
       }
     }
-    console.log(allergens);
     return allergens;
   } catch (error) {
     console.error("Fehler beim Abrufen der Allergene:", error);
@@ -266,12 +265,13 @@ async function createOrUpdateDish(dish, category) {
       console.log("Updategrund: diet" + dish.dietType);
     }
     if (!existingDish.dishCard) {
+      needsUpdate = true;
       await uploadAndAddDishcardUrlToDish(existingDish);
-      console.log("Updategrund: dishcard " + dish.dishCard);
+      console.log("Updategrund: dishcard " + existingDish.dishCard);
     }
     if (needsUpdate) {
       await existingDish.save();
-      console.log(`Dish updated: ${existingDish.name} with ${dish.name}`);
+      console.log(`Dish updated: ${existingDish.name}`);
     } else {
       console.log(`No updates needed for: ${existingDish.name}`);
     }
