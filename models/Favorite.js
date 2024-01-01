@@ -40,17 +40,15 @@ async function createOrUpdateFavorite(userId, guildId, dishId) {
         guildId: guildId,
         dishId: dishId,
       });
-      console.log(
-        `Fav created User: ${userId} Dish: ${dishId} Guild: ${guildId}`
-      );
+      console.log(`Fav created User: ${userId} Dish: ${dishId} Guild: ${guildId}`);
+      return true;
     } catch (err) {
-      console.error(
-        `Could not create Fav User: ${userId}: Dish: ${dishId} Guild: ${guildId}`,
-        err
-      );
+      console.error(`Could not create Fav User: ${userId}: Dish: ${dishId} Guild: ${guildId}`, err);
+      return false;
     }
   } else {
     console.log("Fav already exists");
+    return false;
   }
 }
 

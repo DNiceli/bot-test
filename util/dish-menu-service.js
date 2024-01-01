@@ -72,17 +72,12 @@ async function fetchAndSaveDishes(date) {
               }
               const dish = {
                 name: $(meal).find(".col-xs-6.col-md-5 > .bold").text().trim(),
-                price: $(meal)
-                  .find(".col-xs-12.col-md-3.text-right")
-                  .text()
-                  .trim(),
+                price: $(meal).find(".col-xs-12.col-md-3.text-right").text().trim(),
                 allergens: $(meal)
                   .find("div.kennz.ptr.toolt table tr")
                   .map((i, elem) => $(elem).find("td").eq(1).text().trim())
                   .get()
-                  .map((allergenDesc) =>
-                    allergenLookup(allergenDesc, allergens)
-                  )
+                  .map((allergenDesc) => allergenLookup(allergenDesc, allergens))
                   .filter((allergen) => allergen !== null),
                 ampel: ampelColor,
                 h2o: $(meal)
@@ -125,9 +120,7 @@ async function fetchAndSaveDishes(date) {
 }
 
 const allergenLookup = (description, allergens) => {
-  return (
-    allergens.find((allergen) => allergen.description === description) || null
-  );
+  return allergens.find((allergen) => allergen.description === description) || null;
 };
 
 async function fetchAndSaveAllergens(date) {
@@ -153,9 +146,7 @@ async function fetchAndSaveAllergens(date) {
 
     $("input.itemkennz").each((_, element) => {
       const id = $(element).attr("id").replace("stoff-", "");
-      let description =
-        $(element).next("span").attr("title") ||
-        $(element).parent().text().trim();
+      let description = $(element).next("span").attr("title") || $(element).parent().text().trim();
 
       description = description.replace(/^\(\d+[a-zA-Z]?\)\s*/, ""); //regex um die Nummerierung mit ggf einem Buchstaben zu entfernen
 
@@ -289,11 +280,6 @@ async function getTodaysMenu() {
       today = "2023-12-20";
     }
     const dailyMenu = await Menu.findOne({ date: today }).populate("dishes");
-    if (!dailyMenu) {
-      console.log(`No menu found for ${today}`);
-      return [];
-    }
-
     return dailyMenu.dishes;
   } catch (error) {
     console.error("Error fetching today's menu:", error);

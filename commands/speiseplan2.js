@@ -1,8 +1,7 @@
-require("dotenv").config();
 const { SlashCommandBuilder } = require("discord.js");
 const Favorite = require("../models/Favorite.js");
-const Menu = require("../models/Dailymenu.js");
 const { generateMenuCard } = require("../util/speiseplan-util.js");
+const { getTodaysMenu } = require("../util/dish-menu-service.js");
 const User = require("../models/User.js");
 const arrowLeft = "\u2B05";
 const arrowRight = "\u27A1";
@@ -33,71 +32,47 @@ module.exports = {
   async execute(interaction) {
     try {
       await interaction.deferReply();
-      let today = new Date().toISOString().split("T")[0];
-      if (process.env.OVERRIDE_DATE === "true") {
-        today = "2023-12-20";
-      }
-      let user = await User.findOne({ userId: interaction.user.id });
-      let userAllergens = [];
-      if (!user) {
-        user = new User({
-          userId: interaction.user.id,
-          username: interaction.user.username,
-          guildId: interaction.guild.id,
-          allergens: [],
-        });
-        await user.save();
-      } else {
-        userAllergens = user.allergens;
+      let userAllergens = await findOrCreateUserAllergens(interaction);
+
+      let menuImgs = {
+        Vorspeisen: [],
+        Salate: [],
+        Essen: [],
+        Desserts: [],
+        Suppen: [],
+        Aktionen: [],
+        Beilagen: [],
+      };
+
+      let dailyMenu;
+      try {
+        dailyMenu = await getTodaysMenu();
+      } catch (error) {
+        console.error(error);
+        await interaction.editReply("Es ist kein Menü für heute vorhanden.");
       }
 
-      let dailyMenu = await Menu.findOne({ date: today });
-      if (!dailyMenu) {
-        await interaction.editReply("No menu found for today");
-        return;
-      }
+      await populateMenuImgs(dailyMenu, userAllergens, menuImgs);
 
-      dailyMenu = await dailyMenu.populate("dishes");
-      for (const dish of dailyMenu.dishes) {
-        const shouldSkipDish =
-          userAllergens?.length > 0 &&
-          dish.allergens?.length > 0 &&
-          userAllergens.some((userAllergen) =>
-            dish.allergens.find(
-              (dishAllergen) => dishAllergen.number === userAllergen.number
-            )
-          );
-        if (shouldSkipDish) {
-          continue;
-        }
-        let dishImgObj = await generateMenuCard(dish);
-        menuImgs[dishImgObj.category].push(dishImgObj);
-      }
-
-      console.log("menuImgs: " + menuImgs);
-      let img = menuImgs["Desserts"][0].image;
-      const message = await interaction.editReply({
-        content: "Here's the menu card:",
-        files: [img],
-      });
+      let currentCategory;
+      const reply = await displayMenuImage(interaction, menuImgs, currentCategory);
 
       for (const category of Object.keys(menuImgs)) {
         console.log(category);
-        await message.react(categoryEmojis[category]);
+        await reply.react(categoryEmojis[category]);
       }
 
-      await message.react(arrowLeft);
-      await message.react(arrowRight);
-      await message.react(star);
+      await reply.react(arrowLeft);
+      await reply.react(arrowRight);
+      await reply.react(star);
 
       // Create the message collector to listen for reactions of users
       const filter = (reaction, user) => user.id === interaction.user.id;
-      const collector = message.createReactionCollector({
+      const collector = reply.createReactionCollector({
         filter,
         time: 60000,
       });
 
-      let currentCategory = "Desserts";
       let currentIndex = 0;
 
       collector.on("collect", async (reaction, user) => {
@@ -108,12 +83,10 @@ module.exports = {
 
         switch (reactedEmoji) {
           case arrowLeft:
-            currentIndex =
-              (currentIndex + 1) % menuImgs[currentCategory].length;
+            currentIndex = (currentIndex + 1) % menuImgs[currentCategory].length;
             break;
           case arrowRight:
-            currentIndex =
-              (currentIndex + 1) % menuImgs[currentCategory].length;
+            currentIndex = (currentIndex + 1) % menuImgs[currentCategory].length;
             break;
           case star:
             if (!interaction.guild) return; // Returns as there is no guild
@@ -131,7 +104,7 @@ module.exports = {
           console.log("No dish found");
         } else {
           const newImg = dish.image;
-          await message.edit({
+          await reply.edit({
             content: "Here's the menu card:",
             files: [newImg],
           });
@@ -141,8 +114,8 @@ module.exports = {
 
       collector.on("end", () => {
         // Remove reactions when the collector ends
-        message.reactions.removeAll();
-        message.delete();
+        reply.reactions.removeAll();
+        reply.delete();
       });
     } catch (error) {
       console.error(error);
@@ -150,3 +123,59 @@ module.exports = {
     }
   },
 };
+
+async function populateMenuImgs(dailyMenu, userAllergens, menuImgs) {
+  for (const dish of dailyMenu) {
+    const shouldSkipDish =
+      userAllergens?.length > 0 &&
+      dish.allergens?.length > 0 &&
+      userAllergens.some((userAllergen) =>
+        dish.allergens.find((dishAllergen) => dishAllergen.number === userAllergen.number)
+      );
+    if (shouldSkipDish) {
+      continue;
+    }
+    let dishImgObj = await generateMenuCard(dish);
+    menuImgs[dishImgObj.category].push(dishImgObj);
+  }
+}
+
+async function findOrCreateUserAllergens(interaction) {
+  let userAllergens = [];
+  let user = await User.findOne({ userId: interaction.user.id });
+  if (!user) {
+    user = new User({
+      userId: interaction.user.id,
+      username: interaction.user.username,
+      guildId: interaction.guild.id,
+      allergens: [],
+    });
+    await user.save();
+  } else {
+    userAllergens = user.allergens;
+  }
+  return userAllergens;
+}
+
+async function displayMenuImage(interaction, menuImgs, currentCategory) {
+  for (let category in menuImgs) {
+    if (menuImgs[category].length > 0) {
+      currentCategory = category;
+      break;
+    }
+  }
+  if (currentCategory) {
+    let img = menuImgs[currentCategory][0].image;
+    const reply = await interaction.editReply({
+      content: "Here's the menu card:",
+      files: [img],
+    });
+
+    return reply;
+  } else {
+    const reply = await interaction.editReply({
+      content: "Es gibt kein passendes Gericht zu deinem Filter.",
+    });
+    return reply;
+  }
+}
