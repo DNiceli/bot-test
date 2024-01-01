@@ -103,6 +103,7 @@ async function fetchAndSaveDishes(date) {
                 dish.allergens = [];
               }
               console.log("allergens " + dish.allergens);
+              console.log(dish);
               dishes.push(dish);
             });
 
@@ -121,7 +122,8 @@ async function fetchAndSaveDishes(date) {
 }
 
 const allergenLookup = (description, allergens) => {
-  return allergens.find((allergen) => allergen.description === description) || null;
+  let find = allergens.find((allergen) => allergen.description === description) || null;
+  return { number: find.number, description: find.description };
 };
 
 async function fetchAndSaveAllergens(date) {
@@ -239,10 +241,9 @@ async function createOrUpdateDish(dish, category) {
       needsUpdate = true;
       console.log("Updategrund: price ");
     }
-    if (existingDish.allergens !== dish.allergens) {
+    if (JSON.stringify(existingDish.allergens) !== JSON.stringify(dish.allergens)) {
       existingDish.allergens = dish.allergens;
       needsUpdate = true;
-      console.log("Updategrund: allergens ");
     }
     if (existingDish.co2 !== dish.co2) {
       existingDish.co2 = dish.co2;
@@ -268,15 +269,13 @@ async function createOrUpdateDish(dish, category) {
       await uploadAndAddDishcardUrlToDish(existingDish);
       console.log("Updategrund: dishcard " + dish.dishCard);
     }
-
     if (needsUpdate) {
       await existingDish.save();
-      console.log(`Dish updated: ${existingDish.name}`);
+      console.log(`Dish updated: ${existingDish.name} with ${dish.name}`);
     } else {
       console.log(`No updates needed for: ${existingDish.name}`);
     }
   }
-
   return existingDish;
 }
 

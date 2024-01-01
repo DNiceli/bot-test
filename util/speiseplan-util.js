@@ -35,12 +35,12 @@ async function generateMenuCard(dish) {
   const color = categoryColors[dish.category] || "#FFFFFF"; // default to white if category is unknown
 
   let dishImage = await dish.populate("imageId");
+
   let url = dishImage.imageId.url;
   let allergens = "";
   if (dish.allergens.length > 0) {
     allergens = dish.allergens.map((allergen) => allergen.description).join(", ");
   }
-
   const htmlTemplate = `
     <!DOCTYPE html>
     <html>
@@ -101,6 +101,7 @@ async function generateMenuCard(dish) {
 
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
+  console.log("pop");
   await page.setContent(htmlTemplate);
   const pngBuffer = await page.screenshot({
     type: "png",
@@ -113,6 +114,7 @@ async function generateMenuCard(dish) {
     name: dish.name,
     category: dish.category,
   };
+  console.log("pop");
   return returnObject;
 }
 

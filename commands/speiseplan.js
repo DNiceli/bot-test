@@ -64,7 +64,7 @@ module.exports = {
       collector.on("collect", async (i) => {
         if (i.isStringSelectMenu()) {
           currentDish = i.values[0];
-          let img = menuImgs.find((dish) => dish.name === currentDish).image;
+          let img = menuImgs.find((dish) => dish.name === currentDish).dishCard;
           await interaction.editReply({ content: "You selected " + currentDish, files: [img] });
           console.log(currentDish);
           await i.update("You selected " + currentDish);
@@ -77,7 +77,7 @@ module.exports = {
             case "favorite":
               if (!i.guild) return; // Returns as there is no guild
               if (!currentDish) return;
-              var currentDishId = menuImgs.find((dish) => dish.name === currentDish).id;
+              var currentDishId = menuImgs.find((dish) => dish.name === currentDish)._id;
               var guild = i.guild.id;
               var userID = i.user.id;
               let bool = await Favorite.createOrUpdateFavorite(userID, guild, currentDishId);
@@ -92,7 +92,7 @@ module.exports = {
             case "rate":
               if (!currentDish) return;
               let dishname = menuImgs.find((dish) => dish.name === currentDish).name;
-              let dishId = menuImgs.find((dish) => dish.name === currentDish).id;
+              let dishId = menuImgs.find((dish) => dish.name === currentDish)._id;
               let modal = createRateModal(dishname);
               await i.showModal(modal);
               const submission = await i.awaitModalSubmit({ time: 60_000 });
@@ -170,8 +170,7 @@ async function populateMenuImgs(dailyMenu, userAllergens, menuImgs) {
     if (shouldSkipDish) {
       continue;
     }
-    let dishImgObj = await generateMenuCard(dish);
-    menuImgs.push(dishImgObj);
+    menuImgs.push(dish);
   }
 }
 
