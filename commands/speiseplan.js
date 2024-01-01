@@ -86,38 +86,40 @@ module.exports = {
             case "rate":
               if (!currentDish) return;
               let dishname = menuImgs.find((dish) => dish.name === currentDish).name;
-              modal = createRateModal(dishname);
+              let modal = createRateModal(dishname);
               await i.showModal(modal);
-              await i
-                .awaitModalSubmit({ time: 60_000, filter: "rate" })
-                .then((int) => async () => {
-                  console.log("modal");
-                  const ratingValue = int.values[0];
-                  const userId = int.user.id;
-                  const dishId = menuImgs.find((dish) => dish.name === currentDish).id;
-                  await Rating.create({ userId, dishId, score: ratingValue });
-                  await interaction.update({
-                    content: "You rated " + currentDish + " with " + ratingValue,
-                  });
-                  interaction.editReply("Thank you for your submission!");
-                })
-                .catch((err) => console.log("No modal submit interaction was collected"));
-              console.log("rate");
+              const submission = await i.awaitModalSubmit({ time: 60_000 });
+              if (!submission) {
+                submission.update({ content: "You did not provide a rating" });
+                break;
+              } else if (submission.isModalSubmit()) {
+                if (!submission.components[0].components[0].value) {
+                  await submission.update({ content: "Please enter a value between 1 and 5" });
+                  break;
+                }
+                if (
+                  isNaN(submission.components[0].components[0].value) ||
+                  submission.components[0].components[0].value > 5 ||
+                  submission.components[0].components[0].value < 1
+                ) {
+                  await submission.update({ content: "Please enter a value between 1 and 5" });
+                  break;
+                }
+                const ratingValue = submission.components[0].components[0].value;
+                const userId = submission.user.id;
+                const dishId = menuImgs.find((dish) => dish.name === currentDish).id;
+                await Rating.create({ userId, dishId, score: ratingValue });
+                await submission.update({
+                  content: "You rated " + currentDish + " withhhh " + ratingValue,
+                });
+              }
+              console.log(submission.components[0].components[0].value);
               break;
             case "close":
               console.log("close");
               await i.deferUpdate();
               break;
           }
-        } else if (i.isModalSubmit()) {
-          console.log("modal");
-          const ratingValue = i.values[0];
-          const userId = i.user.id;
-          const dishId = menuImgs.find((dish) => dish.name === currentDish).id;
-          await Rating.create({ userId, dishId, score: ratingValue });
-          await interaction.update({
-            content: "You rated " + currentDish + " with " + ratingValue,
-          });
         }
       });
     } catch (error) {
