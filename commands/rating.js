@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { SlashCommandBuilder } = require("discord.js");
-const { Rating } = require("../models/Rating.js");
+const Rating = require("../models/Rating.js");
 const { Dish } = require("../models/Dish.js");
 
 module.exports = {
@@ -43,9 +43,7 @@ module.exports = {
       );
     } catch (error) {
       console.error(error);
-      await interaction.editReply(
-        "Es gab einen Fehler beim Bewerten des Gerichts."
-      );
+      await interaction.editReply("Es gab einen Fehler beim Bewerten des Gerichts.");
     }
   },
 };

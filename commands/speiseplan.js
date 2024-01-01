@@ -6,11 +6,15 @@ const {
   ComponentType,
   ButtonBuilder,
   ButtonStyle,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
 } = require("discord.js");
 const Favorite = require("../models/Favorite.js");
 const { generateMenuCard } = require("../util/speiseplan-util.js");
 const { getTodaysMenu } = require("../util/dish-menu-service.js");
 const User = require("../models/User.js");
+const Rating = require("../models/Rating.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -45,7 +49,8 @@ module.exports = {
       const collector = response.createMessageComponentCollector({
         filter: (i) =>
           (i.componentType === ComponentType.Button ||
-            i.componentType === ComponentType.StringSelect) &&
+            i.componentType === ComponentType.StringSelect ||
+            i.componentType === ComponentType.Modal) &&
           i.user.id === interaction.user.id,
         time: 300_000, // Reduced time to 5 minutes
       });
@@ -60,6 +65,7 @@ module.exports = {
         } else if (i.isButton()) {
           switch (i.customId) {
             case "submit":
+              await i.deferUpdate();
               console.log("sub");
               break;
             case "favorite":
@@ -75,15 +81,43 @@ module.exports = {
                 interaction.editReply({ content: "Already in favorites: " + currentDish });
               }
               console.log("fav");
+              await i.deferUpdate();
               break;
             case "rate":
+              if (!currentDish) return;
+              let dishname = menuImgs.find((dish) => dish.name === currentDish).name;
+              modal = createRateModal(dishname);
+              await i.showModal(modal);
+              await i
+                .awaitModalSubmit({ time: 60_000, filter: "rate" })
+                .then((int) => async () => {
+                  console.log("modal");
+                  const ratingValue = int.values[0];
+                  const userId = int.user.id;
+                  const dishId = menuImgs.find((dish) => dish.name === currentDish).id;
+                  await Rating.create({ userId, dishId, score: ratingValue });
+                  await interaction.update({
+                    content: "You rated " + currentDish + " with " + ratingValue,
+                  });
+                  interaction.editReply("Thank you for your submission!");
+                })
+                .catch((err) => console.log("No modal submit interaction was collected"));
               console.log("rate");
               break;
             case "close":
               console.log("close");
+              await i.deferUpdate();
               break;
           }
-          await i.deferUpdate();
+        } else if (i.isModalSubmit()) {
+          console.log("modal");
+          const ratingValue = i.values[0];
+          const userId = i.user.id;
+          const dishId = menuImgs.find((dish) => dish.name === currentDish).id;
+          await Rating.create({ userId, dishId, score: ratingValue });
+          await interaction.update({
+            content: "You rated " + currentDish + " with " + ratingValue,
+          });
         }
       });
     } catch (error) {
@@ -92,6 +126,21 @@ module.exports = {
     }
   },
 };
+
+function createRateModal(dishname) {
+  const modal = new ModalBuilder().setCustomId("rate").setTitle(dishname);
+  const rateInput = new TextInputBuilder()
+    .setCustomId("rate")
+    .setLabel("Wie würdest du das Gericht bewerten?")
+    .setStyle(TextInputStyle.Short)
+    .setMinLength(1)
+    .setMaxLength(1)
+    .setRequired(true);
+
+  const firstActionRow = new ActionRowBuilder().addComponents(rateInput);
+  modal.addComponents(firstActionRow);
+  return modal;
+}
 
 async function populateMenuImgs(dailyMenu, userAllergens, menuImgs) {
   for (const dish of dailyMenu) {
