@@ -37,9 +37,7 @@ async function generateMenuCard(dish) {
   let url = dishImage.imageId.url;
   let allergens = "";
   if (dish.allergens.length > 0) {
-    allergens = dish.allergens
-      .map((allergen) => allergen.description)
-      .join(", ");
+    allergens = dish.allergens.map((allergen) => allergen.description).join(", ");
   }
 
   const htmlTemplate = `
@@ -116,6 +114,8 @@ async function generateMenuCard(dish) {
   };
   return returnObject;
 }
+
+async function getMenuCard(dish) {}
 
 module.exports = {
   generateMenuCard,
