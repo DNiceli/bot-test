@@ -118,6 +118,7 @@ async function handleSubmission(submission, dishId, currentDish) {
   } else if (submission.isModalSubmit()) {
     if (!submission.components[0].components[0].value) {
       await submission.update({ content: "Please enter a value between 1 and 5" });
+      return;
     }
     if (
       isNaN(submission.components[0].components[0].value) ||
@@ -125,17 +126,18 @@ async function handleSubmission(submission, dishId, currentDish) {
       submission.components[0].components[0].value < 1
     ) {
       await submission.update({ content: "Please enter a value between 1 and 5" });
+      return;
     }
     const ratingValue = submission.components[0].components[0].value;
     const ratingComment = submission.components[1].components[0].value;
     const userId = submission.user.id;
     await Rating.createOrUpdateRating(userId, dishId, ratingValue, ratingComment);
     await submission.update({
-      content: "You rated " + currentDish + " withhhh " + ratingValue,
+      content: "You rated " + currentDish + " with " + ratingValue,
     });
   }
 }
-
+//
 function createRateModal(dishname) {
   const modal = new ModalBuilder().setCustomId("rate").setTitle(dishname);
   const rateInput = new TextInputBuilder()
