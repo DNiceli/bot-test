@@ -1,5 +1,6 @@
 const sharp = require("sharp");
 const puppeteer = require("puppeteer");
+const { uploadBuffer, uploadImageBuffer } = require("./image-creation-service");
 
 async function generateMenuCard2(dish) {
   const svgTemplate = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
@@ -115,9 +116,23 @@ async function generateMenuCard(dish) {
   return returnObject;
 }
 
-async function getMenuCard(dish) {}
+function uploadAndAddDishcardUrlToDish(dish) {
+  return generateMenuCard(dish)
+    .then((dishCardObject) => {
+      uploadImageBuffer(dishCardObject.image)
+        .then((result) => {
+          dish.dishCard = result.url;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
 
 module.exports = {
   generateMenuCard,
-  generateMenuCard2,
+  uploadAndAddDishcardUrlToDish,
 };

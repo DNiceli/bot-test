@@ -4,7 +4,8 @@ const cheerio = require("cheerio");
 const Dish = require("../models/Dish.js");
 const Menu = require("../models/Dailymenu.js");
 const Allergen = require("../models/Allergen.js");
-const createUploadAndSaveDishPicture = require("./image-creation-service");
+const { createUploadAndSaveDishPicture } = require("./image-creation-service");
+const { uploadAndAddDishcardUrlToDish } = require("./speiseplan-util.js");
 
 async function fetchAndSaveDishes(date) {
   try {
@@ -112,7 +113,7 @@ async function fetchAndSaveDishes(date) {
       .catch((error) => {
         console.log(error);
       });
-    createDishes(menu);
+    createAndSaveDishMenu(menu);
     return menu;
   } catch (error) {
     console.error(error);
@@ -183,7 +184,7 @@ async function fetchAndSaveAllergens(date) {
   }
 }
 
-async function createDishes(menu) {
+async function createAndSaveDishMenu(menu) {
   const today = new Date().toISOString().split("T")[0];
   let dailyMenu = await Menu.findOne({ date: today });
 
@@ -227,6 +228,8 @@ async function createOrUpdateDish(dish, category) {
       imageId: imageID,
       dietType: dish.dietType,
     });
+    await uploadAndAddDishcardUrlToDish(existingDish);
+    existingDish.save();
     console.log(`Dish created: ${existingDish.name}`);
   } else {
     let needsUpdate = false;
@@ -260,6 +263,10 @@ async function createOrUpdateDish(dish, category) {
       existingDish.dietType = dish.dietType;
       needsUpdate = true;
       console.log("Updategrund: diet" + dish.dietType);
+    }
+    if (!existingDish.dishCard) {
+      await uploadAndAddDishcardUrlToDish(existingDish);
+      console.log("Updategrund: dishcard " + dish.dishCard);
     }
 
     if (needsUpdate) {

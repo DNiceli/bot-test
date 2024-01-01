@@ -2,10 +2,7 @@ require("dotenv").config();
 const fs = require("node:fs");
 const path = require("node:path");
 const mongoose = require("./dbInit.js");
-const {
-  fetchAndSaveDishes,
-  fetchAndSaveAllergens,
-} = require("./util/dish-menu-service.js");
+const { fetchAndSaveDishes, fetchAndSaveAllergens } = require("./util/dish-menu-service.js");
 const { notify } = require("./util/notification-service.js");
 const cron = require("node-cron");
 
@@ -32,15 +29,13 @@ const client = new Client({
 
 client.once("ready", () => {
   console.log("Bot is online!");
-  //fetchAndSaveDishes(new Date().toISOString().split("T")[0]);
+  fetchAndSaveDishes(new Date().toISOString().split("T")[0]);
   //fetchAndSaveAllergens(new Date().toISOString().split("T")[0]);
 });
 
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs
-  .readdirSync(commandsPath)
-  .filter((file) => file.endsWith(".js"));
+const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".js"));
 
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);

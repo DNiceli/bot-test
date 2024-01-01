@@ -51,6 +51,10 @@ const dishSchema = new Schema(
       enum: ["vegan", "vegetarisch", "keine Angabe"],
       default: "keine Angabe",
     },
+    dishCard: {
+      type: String,
+      required: false,
+    },
   },
   {
     timestamps: true,
