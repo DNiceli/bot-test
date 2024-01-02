@@ -102,8 +102,6 @@ async function fetchAndSaveDishes(date) {
               if (!dish.allergens) {
                 dish.allergens = [];
               }
-              console.log("allergens " + dish.allergens);
-              console.log(dish);
               dishes.push(dish);
             });
 

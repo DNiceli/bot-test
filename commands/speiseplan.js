@@ -11,7 +11,6 @@ const {
   TextInputStyle,
 } = require("discord.js");
 const Favorite = require("../models/Favorite.js");
-const { generateMenuCard } = require("../util/speiseplan-util.js");
 const { getTodaysMenu } = require("../util/dish-menu-service.js");
 const User = require("../models/User.js");
 const Rating = require("../models/Rating.js");
@@ -60,6 +59,7 @@ module.exports = {
           i.user.id === interaction.user.id,
         time: 300_000, // Reduced time to 5 minutes
       });
+
       let currentDish;
       collector.on("collect", async (i) => {
         if (i.isStringSelectMenu()) {
@@ -75,8 +75,11 @@ module.exports = {
               console.log("sub");
               break;
             case "favorite":
-              if (!i.guild) return; // Returns as there is no guild
-              if (!currentDish) return;
+              if (!i.guild) return;
+              if (!currentDish) {
+                await i.deferUpdate(); // TODO: Tell User to choose Dish first
+                return;
+              }
               var currentDishId = menuImgs.find((dish) => dish.name === currentDish)._id;
               var guild = i.guild.id;
               var userID = i.user.id;
@@ -90,10 +93,13 @@ module.exports = {
               await i.deferUpdate();
               break;
             case "rate":
-              if (!currentDish) return;
+              if (!currentDish) {
+                await i.deferUpdate(); // TODO: Tell User to choose Dish first
+                return;
+              }
               let dishname = menuImgs.find((dish) => dish.name === currentDish).name;
               let dishId = menuImgs.find((dish) => dish.name === currentDish)._id;
-              let modal = createRateModal(dishname);
+              let modal = createRateModal(dishname); // problem: dishname is undefined
               await i.showModal(modal);
               const submission = await i.awaitModalSubmit({ time: 60_000 });
               await handleSubmission(submission, dishId, currentDish);
@@ -139,6 +145,7 @@ async function handleSubmission(submission, dishId, currentDish) {
 }
 //
 function createRateModal(dishname) {
+  if (dishname.length > 45) dishname = dishname.substring(0, 45);
   const modal = new ModalBuilder().setCustomId("rate").setTitle(dishname);
   const rateInput = new TextInputBuilder()
     .setCustomId("value")
