@@ -18,31 +18,62 @@ const Rating = require("../models/Rating.js");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("speiseplan")
-    .setDescription("sieht speiseplan in dishcard mit buttons"),
+    .setDescription("sieht speiseplan in dishcard mit buttons")
+    .addStringOption((option) =>
+      option
+        .setName("woche")
+        .setDescription("Woche")
+        .setRequired(false)
+        .addChoices(
+          { name: "Diese Woche", value: "1" },
+          { name: "Nächste Woche", value: "2" },
+          { name: "Letzte Woche", value: "3" }
+        )
+    )
+    .addStringOption((option) =>
+      option
+        .setName("wochentag")
+        .setDescription("Wochentag")
+        .setRequired(false)
+        .addChoices(
+          { name: "Sonntag", value: "0" },
+          { name: "Montag", value: "1" },
+          { name: "Dienstag", value: "2" },
+          { name: "Mittwoch", value: "3" },
+          { name: "Donnerstag", value: "4" },
+          { name: "Feitag", value: "5" },
+          { name: "Samstag", value: "6" }
+        )
+    ),
   async execute(interaction) {
     try {
       await interaction.deferReply({ ephemeral: true });
+      const woche = interaction.options.getString("woche");
+      const wochentag = interaction.options.getString("wochentag"); //
+      console.log(woche, wochentag);
+      let date;
+      if (woche && !wochentag)
+        return await interaction.editReply("Bitte gib eine Woche und einen Wochentag an.");
+      if (!woche && wochentag) date = getDateForWeekday("1", wochentag);
+      else if (woche && wochentag) {
+        date = getDateForWeekday(woche, wochentag);
+      } else {
+        date = new Date().toISOString().split("T")[0];
+      }
       let userAllergens = await findOrCreateUserAllergens(interaction);
-
       let menuImgs = [];
-
       let dailyMenu;
       try {
-        dailyMenu = await getTodaysMenu();
+        dailyMenu = await getTodaysMenu(date);
       } catch (error) {
         console.error(error);
         await interaction.editReply("Es ist kein Menü für heute vorhanden.");
       }
+      //console.log(dailyMenu.map((dish) => dish.name).join(", "));           possibly openAi keyword generation for dishes to generate recommendations
 
-      await populateMenuImgs(dailyMenu, userAllergens, menuImgs); //menuImgs is a map with dish as key and array of images as value
-
-      const size = Buffer.byteLength(JSON.stringify(menuImgs));
-      const kiloBytes = size / 1024;
-      const megaBytes = kiloBytes / 1024;
-      console.log(`Size of MenuImage: ${megaBytes} MB`);
-      console.log(`Size of MenuImage: ${kiloBytes} KB`);
-
-      const components = createDishSelectMenu(menuImgs); //create select menus for each dish
+      await populateMenuImgs(dailyMenu, userAllergens, menuImgs);
+      sizeOf(menuImgs);
+      const components = createDishSelectMenu(menuImgs); //create select menus option for each dish
 
       response = await interaction.editReply({
         content: "Adjust the settings here:",
@@ -66,7 +97,6 @@ module.exports = {
           currentDish = i.values[0];
           let img = menuImgs.find((dish) => dish.name === currentDish).dishCard;
           await interaction.editReply({ content: "You selected " + currentDish, files: [img] });
-          console.log(currentDish);
           await i.update("You selected " + currentDish);
         } else if (i.isButton()) {
           switch (i.customId) {
@@ -89,7 +119,6 @@ module.exports = {
               } else {
                 interaction.editReply({ content: "Already in favorites: " + currentDish });
               }
-              console.log("fav");
               await i.deferUpdate();
               break;
             case "rate":
@@ -117,6 +146,14 @@ module.exports = {
     }
   },
 };
+
+function sizeOf(menuImgs) {
+  const size = Buffer.byteLength(JSON.stringify(menuImgs));
+  const kiloBytes = size / 1024;
+  const megaBytes = kiloBytes / 1024;
+  console.log(`Size of MenuImage: ${megaBytes} MB`);
+  console.log(`Size of MenuImage: ${kiloBytes} KB`);
+}
 
 async function handleSubmission(submission, dishId, currentDish) {
   if (!submission) {
@@ -227,4 +264,28 @@ function createDishSelectMenu(menuImgs) {
   );
   components.push(buttonRow);
   return components;
+}
+
+function getDateForWeekday(weekChoice, weekdayChoice) {
+  const today = new Date();
+  const currentWeekday = today.getDay();
+
+  let date;
+  switch (weekChoice) {
+    case "1": // Diese Woche
+      date = new Date(today);
+      date.setDate(today.getDate() + (weekdayChoice - currentWeekday));
+      break;
+    case "2": // Nächste Woche
+      date = new Date(today);
+      date.setDate(today.getDate() + 7 + (weekdayChoice - currentWeekday));
+      break;
+    case "3": // Letzte Woche
+      date = new Date(today);
+      date.setDate(today.getDate() - 7 + (weekdayChoice - currentWeekday));
+      break;
+  }
+  console.log(date);
+
+  return date.toISOString().split("T")[0];
 }

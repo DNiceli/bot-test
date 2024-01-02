@@ -277,13 +277,12 @@ async function createOrUpdateDish(dish, category) {
   return existingDish;
 }
 
-async function getTodaysMenu() {
+async function getTodaysMenu(date) {
   try {
-    let today = new Date().toISOString().split("T")[0];
     if (process.env.OVERRIDE_DATE === "true") {
-      today = "2023-12-20";
+      date = "2023-12-20";
     }
-    const dailyMenu = await Menu.findOne({ date: today }).populate("dishes");
+    const dailyMenu = await Menu.findOne({ date: date }).populate("dishes");
     return dailyMenu.dishes;
   } catch (error) {
     console.error("Error fetching today's menu:", error);
