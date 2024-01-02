@@ -49,7 +49,7 @@ module.exports = {
     try {
       await interaction.deferReply({ ephemeral: true });
       const woche = interaction.options.getString("woche");
-      const wochentag = interaction.options.getString("wochentag"); //
+      const wochentag = interaction.options.getString("wochentag");
       console.log(woche, wochentag);
       let date;
       if (woche && !wochentag)

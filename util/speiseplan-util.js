@@ -1,6 +1,7 @@
 const sharp = require("sharp");
 const puppeteer = require("puppeteer");
-const { uploadBuffer, uploadImageBuffer } = require("./image-creation-service");
+const { uploadImageBuffer } = require("./image-creation-service");
+const path = require("path");
 
 async function generateMenuCard2(dish) {
   const svgTemplate = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
@@ -19,6 +20,73 @@ async function generateMenuCard2(dish) {
 
   const pngBuffer = await sharp(Buffer.from(svgData)).png().toBuffer();
   return pngBuffer;
+}
+
+async function generateMenuImage(weekMenus) {
+  const browser = await puppeteer.launch();
+  const page = await browser.newPage();
+  let htmlPath = path.join(__dirname, "../template/weekMenu.html");
+
+  const weekMenusArray = Array.from(weekMenus).map(([day, dishes]) => ({ day, dishes }));
+
+  console.log(weekMenusArray);
+
+  await page.setViewport({ width: 1920, height: 1080 });
+  await page.goto(`file://${htmlPath}`);
+
+  await page.evaluate((weekMenusArray) => {
+    function fillMenuTemplate(weekMenusArray) {
+      weekMenusArray.forEach(({ day, dishes }) => {
+        const dayDiv = document.getElementById(day);
+        if (!dayDiv) {
+          console.warn(`Kein Element gefunden für den Tag: ${day}`);
+          return;
+        }
+
+        dishes.forEach((dish) => {
+          const dishElement = createDishElement(dish);
+          dayDiv.appendChild(dishElement);
+        });
+      });
+    }
+
+    function createDishElement(dish) {
+      const dishDiv = document.createElement("div");
+      dishDiv.className = "dish";
+
+      const nameEl = document.createElement("h3");
+      nameEl.textContent = dish.name;
+      dishDiv.appendChild(nameEl);
+
+      const detailsEl = document.createElement("p");
+      detailsEl.innerHTML = `
+          <strong>Kategorie:</strong> ${dish.category}<br>
+          <strong>Preis:</strong> ${dish.price}<br>
+          <strong>CO2-Emissionen:</strong> ${dish.co2 || "N/A"}<br>
+          <strong>H2O-Verbrauch:</strong> ${dish.h2o || "N/A"}<br>
+          <strong>Ampel:</strong> ${dish.ampel}<br>
+          <strong>Diättyp:</strong> ${dish.dietType}
+      `;
+      dishDiv.appendChild(detailsEl);
+
+      if (dish.allergens && dish.allergens.length > 0) {
+        const allergensEl = document.createElement("ul");
+        dish.allergens.forEach((allergen) => {
+          const allergenItem = document.createElement("li");
+          allergenItem.textContent = `${allergen.description} (${allergen.number})`;
+          allergensEl.appendChild(allergenItem);
+        });
+        dishDiv.appendChild(allergensEl);
+      }
+      return dishDiv;
+    }
+
+    fillMenuTemplate(weekMenusArray);
+  }, weekMenusArray);
+
+  const buffer = await page.screenshot({ format: "png", fullPage: true });
+  await browser.close();
+  return buffer;
 }
 
 async function generateMenuCard(dish) {
@@ -126,4 +194,5 @@ async function uploadAndAddDishcardUrlToDish(dish) {
 module.exports = {
   generateMenuCard,
   uploadAndAddDishcardUrlToDish,
+  generateMenuImage,
 };

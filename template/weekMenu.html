@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <title>Wochen-Speisekarte</title>
+    <style>
+      #menu-week {
+        display: flex; /* Flex-Container */
+        flex-direction: row; /* Horizontale Anordnung */
+        flex-wrap: wrap; /* Bei Bedarf umbruch */
+      }
+      .day-menu {
+        flex: 1; /* Flex-Elemente gleichmäßig verteilen */
+        border: 1px solid #ddd;
+        margin: 10px;
+        padding: 10px;
+        min-width: 150px; /* Minimale Breite für jeden Tag */
+      }
+      .dish {
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #ccc;
+      }
+      h3 {
+        margin: 0 0 10px 0;
+      }
+      p,
+      ul {
+        margin: 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menu-week">
+      <div id="montag" class="day-menu">Montag</div>
+      <div id="dienstag" class="day-menu">Dienstag</div>
+      <div id="mittwoch" class="day-menu">Mittwoch</div>
+      <div id="donnerstag" class="day-menu">Donnerstag</div>
+      <div id="freitag" class="day-menu">Freitag</div>
+    </div>
+  </body>
+</html>

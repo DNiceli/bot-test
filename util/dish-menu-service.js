@@ -290,8 +290,54 @@ async function getTodaysMenu(date) {
   }
 }
 
+function getWeekDayName(dayIndex) {
+  const weekDays = [
+    "sonntag",
+    "montag",
+    "dienstag",
+    "mittwoch",
+    "donnerstag",
+    "freitag",
+    "samstag",
+  ];
+  return weekDays[dayIndex];
+}
+
+async function getWeekMenu(date) {
+  let weekDays = getWeekDays(date); // Diese Funktion sollte ein Array von Date-Objekten zurückgeben
+  let weekMenu = new Map();
+  for (let day of weekDays) {
+    let dishes = await getTodaysMenu(day.toISOString().split("T")[0]);
+    let dayName = getWeekDayName(day.getDay());
+    weekMenu.set(dayName, dishes);
+  }
+  return weekMenu;
+}
+
+function getWeekDays(date) {
+  let currentDate = new Date(date);
+
+  let currentDayOfWeek = currentDate.getDay();
+
+  let differenceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+
+  let monday = new Date(currentDate);
+  monday.setDate(monday.getDate() + differenceToMonday);
+
+  let weekDays = [];
+
+  for (let i = 0; i < 5; i++) {
+    let weekDay = new Date(monday);
+    weekDay.setDate(monday.getDate() + i);
+    weekDays.push(weekDay); // Formatierung als "YYYY-MM-DD"
+  }
+
+  return weekDays;
+}
+
 module.exports = {
   fetchAndSaveDishes,
   getTodaysMenu,
   fetchAndSaveAllergens,
+  getWeekMenu,
 };
