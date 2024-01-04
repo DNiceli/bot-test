@@ -1,11 +1,11 @@
-require("dotenv").config();
-const { SlashCommandBuilder } = require("discord.js");
-const Notification = require("../models/Notification.js");
+require('dotenv').config();
+const { SlashCommandBuilder } = require('discord.js');
+const Notification = require('../models/Notification.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("toggle-notification")
-    .setDescription("Enable / Disable Dish Notifications"),
+    .setName('toggle-notification')
+    .setDescription('Enable / Disable Dish Notifications'),
   async execute(interaction) {
     try {
       const userid = interaction.user.id;
@@ -15,19 +15,24 @@ module.exports = {
           userId: userid,
           notification: false,
         });
-        interaction.reply("Notifications created + enabled");
-      } else if (notification.notification === false) {
+        interaction.reply('Notifications created + enabled');
+      }
+ else if (notification.notification === false) {
         notification.notification = true;
         await notification.save();
-        interaction.reply("Notifications enabled");
-      } else {
+        interaction.reply('Notifications enabled');
+      }
+ else {
         notification.notification = false;
         await notification.save();
-        interaction.reply("Notifications disabled");
+        interaction.reply('Notifications disabled');
       }
-    } catch (error) {
+    }
+ catch (error) {
       console.error(error);
-      await interaction.editReply("Es gab einen Fehler beim Aktivieren der Benachrichtigungen.");
+      await interaction.editReply(
+        'Es gab einen Fehler beim Aktivieren der Benachrichtigungen.',
+      );
     }
   },
 };

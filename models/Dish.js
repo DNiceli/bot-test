@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const dishSchema = new Schema(
@@ -6,17 +6,17 @@ const dishSchema = new Schema(
     name: {
       type: String,
       required: true,
-      default: "",
+      default: '',
     },
     category: {
       type: String,
       required: true,
-      default: "",
+      default: '',
     },
     price: {
       type: String,
       required: true,
-      default: "",
+      default: '',
     },
     allergens: [
       {
@@ -28,28 +28,28 @@ const dishSchema = new Schema(
     co2: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     h2o: {
       type: String,
       required: false,
-      default: "",
+      default: '',
     },
     ampel: {
       type: String,
       required: true,
-      default: "",
+      default: '',
     },
     imageId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Image",
+      ref: 'Image',
       required: false,
     },
     dietType: {
       type: String,
       required: true,
-      enum: ["vegan", "vegetarisch", "keine Angabe"],
-      default: "keine Angabe",
+      enum: ['vegan', 'vegetarisch', 'keine Angabe'],
+      default: 'keine Angabe',
     },
     dishCard: {
       type: String,
@@ -58,9 +58,9 @@ const dishSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const Dish = mongoose.model("Dish", dishSchema);
+const Dish = mongoose.model('Dish', dishSchema);
 
 module.exports = Dish;

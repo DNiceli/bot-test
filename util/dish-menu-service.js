@@ -1,11 +1,11 @@
-require("dotenv").config();
-const axios = require("axios");
-const cheerio = require("cheerio");
-const Dish = require("../models/Dish.js");
-const Menu = require("../models/Dailymenu.js");
-const Allergen = require("../models/Allergen.js");
-const { createUploadAndSaveDishPicture } = require("./image-creation-service");
-const { uploadAndAddDishcardUrlToDish } = require("./speiseplan-util.js");
+require('dotenv').config();
+const axios = require('axios');
+const cheerio = require('cheerio');
+const Dish = require('../models/Dish.js');
+const Menu = require('../models/Dailymenu.js');
+const Allergen = require('../models/Allergen.js');
+const { createUploadAndSaveDishPicture } = require('./image-creation-service');
+const { uploadAndAddDishcardUrlToDish } = require('./speiseplan-util.js');
 
 async function fetchAndSaveDishes(date) {
   try {
@@ -15,88 +15,102 @@ async function fetchAndSaveDishes(date) {
     if (!allergens) {
       allergens = await fetchAndSaveAllergens();
     }
+    if (process.env.OVERRIDE_DATE === 'true') {
+      date = '2023-12-20';
+    }
     await axios
       .post(
         url,
         new URLSearchParams({
-          resources_id: "527",
-          date: "2023-12-20", //date, // "YYYY-MM-DD"
+          resources_id: '527',
+          date: date,
         }),
         {
           headers: {
-            "x-requested-with": "XMLHttpRequest",
+            'x-requested-with': 'XMLHttpRequest',
           },
-        }
+        },
       )
       .then((response) => {
         const html = response.data;
         const $ = cheerio.load(html);
-
-        $(".container-fluid.splGroupWrapper").each((_, groupWrapper) => {
-          const group = $(groupWrapper).find(".splGroup").text().trim();
+        /* eslint no-shadow: ["error", { "allow": ["_"] }]*/
+        /* eslint-env es6*/
+        $('.container-fluid.splGroupWrapper').each((_, groupWrapper) => {
+          const group = $(groupWrapper).find('.splGroup').text().trim();
           const dishes = [];
 
           $(groupWrapper)
-            .find(".row.splMeal")
+            .find('.row.splMeal')
             .each(async (_, meal) => {
-              let dietType = "keine Angabe"; // Standardwert
+              let dietType = 'keine Angabe';
               const dietInfo = $(meal)
-                .find("img.splIcon")
+                .find('img.splIcon')
                 .map((i, elem) => {
-                  const altText = $(elem).attr("alt");
-                  if (altText.includes("Vegan")) {
-                    return "vegan";
-                  } else if (altText.includes("Vegetarisch")) {
-                    return "vegetarisch";
+                  const altText = $(elem).attr('alt');
+                  if (altText.includes('Vegan')) {
+                    return 'vegan';
+                  }
+ else if (altText.includes('Vegetarisch')) {
+                    return 'vegetarisch';
                   }
                   return null;
                 })
                 .get();
 
-              if (dietInfo.includes("vegan")) {
-                dietType = "vegan";
-              } else if (dietInfo.includes("vegetarisch")) {
-                dietType = "vegetarisch";
+              if (dietInfo.includes('vegan')) {
+                dietType = 'vegan';
+              }
+ else if (dietInfo.includes('vegetarisch')) {
+                dietType = 'vegetarisch';
               }
 
-              let ampelText = $(meal).find("img.splIcon").attr("alt");
+              const ampelText = $(meal).find('img.splIcon').attr('alt');
 
               let ampelColor;
-              if (ampelText.includes("Grüner")) {
-                ampelColor = "Grün";
-              } else if (ampelText.includes("Roter")) {
-                ampelColor = "Rot";
-              } else if (ampelText.includes("Gelber")) {
-                ampelColor = "Gelb";
-              } else {
-                ampelColor = "Unbekannt";
+              if (ampelText.includes('Grüner')) {
+                ampelColor = 'Grün';
+              }
+ else if (ampelText.includes('Roter')) {
+                ampelColor = 'Rot';
+              }
+ else if (ampelText.includes('Gelber')) {
+                ampelColor = 'Gelb';
+              }
+ else {
+                ampelColor = 'Unbekannt';
               }
               const dish = {
-                name: $(meal).find(".col-xs-6.col-md-5 > .bold").text().trim(),
-                price: $(meal).find(".col-xs-12.col-md-3.text-right").text().trim(),
+                name: $(meal).find('.col-xs-6.col-md-5 > .bold').text().trim(),
+                price: $(meal)
+                  .find('.col-xs-12.col-md-3.text-right')
+                  .text()
+                  .trim(),
                 allergens: $(meal)
-                  .find("div.kennz.ptr.toolt table tr")
-                  .map((i, elem) => $(elem).find("td").eq(1).text().trim())
+                  .find('div.kennz.ptr.toolt table tr')
+                  .map((i, elem) => $(elem).find('td').eq(1).text().trim())
                   .get()
-                  .map((allergenDesc) => allergenLookup(allergenDesc, allergens))
+                  .map((allergenDesc) =>
+                    allergenLookup(allergenDesc, allergens),
+                  )
                   .filter((allergen) => allergen !== null),
                 ampel: ampelColor,
                 h2o: $(meal)
-                  .find("img[aria-describedby^='tooltip_H2O']")
+                  .find('img[aria-describedby^=\'tooltip_H2O\']')
                   .parent()
-                  .find(".shocl_content")
+                  .find('.shocl_content')
                   .last()
                   .text()
                   .trim()
-                  .split("Wasserverbrauch")[0],
+                  .split('Wasserverbrauch')[0],
                 co2: $(meal)
-                  .find("img[aria-describedby^='tooltip_CO2']")
+                  .find('img[aria-describedby^=\'tooltip_CO2\']')
                   .parent()
-                  .find(".shocl_content")
+                  .find('.shocl_content')
                   .first()
                   .text()
                   .trim()
-                  .split("CO2")[0],
+                  .split('CO2')[0],
                 dietType: dietType,
               };
               if (!dish.allergens) {
@@ -114,13 +128,15 @@ async function fetchAndSaveDishes(date) {
       });
     createAndSaveDishMenu(menu);
     return menu;
-  } catch (error) {
+  }
+ catch (error) {
     console.error(error);
   }
 }
 
 const allergenLookup = (description, allergens) => {
-  let find = allergens.find((allergen) => allergen.description === description) || null;
+  const find =
+    allergens.find((allergen) => allergen.description === description) || null;
   return { number: find.number, description: find.description };
 };
 
@@ -128,28 +144,34 @@ async function fetchAndSaveAllergens(date) {
   try {
     const url = process.env.mensaUrl2;
     const allergens = [];
+    if (process.env.OVERRIDE_DATE === 'true') {
+      date = '2023-12-20';
+    }
 
     const response = await axios.post(
       url,
       new URLSearchParams({
-        resources_id: "527",
-        date: "2023-12-20", // oder date
+        resources_id: '527',
+        date: date,
       }),
       {
         headers: {
-          "x-requested-with": "XMLHttpRequest",
+          'x-requested-with': 'XMLHttpRequest',
         },
-      }
+      },
     );
 
     const html = response.data;
     const $ = cheerio.load(html);
 
-    $("input.itemkennz").each((_, element) => {
-      const id = $(element).attr("id").replace("stoff-", "");
-      let description = $(element).next("span").attr("title") || $(element).parent().text().trim();
+    $('input.itemkennz').each((_, element) => {
+      const id = $(element).attr('id').replace('stoff-', '');
+      let description =
+        $(element).next('span').attr('title') ||
+        $(element).parent().text().trim();
 
-      description = description.replace(/^\(\d+[a-zA-Z]?\)\s*/, ""); //regex um die Nummerierung mit ggf einem Buchstaben zu entfernen
+      // regex um die Nummerierung mit ggf einem Buchstaben zu entfernen
+      description = description.replace(/^\(\d+[a-zA-Z]?\)\s*/, '');
 
       const allergen = {
         nr: id,
@@ -168,7 +190,8 @@ async function fetchAndSaveAllergens(date) {
           existingAllergen.description = allergenData.beschreibung;
           await existingAllergen.save();
         }
-      } else {
+      }
+ else {
         const newAllergen = new Allergen({
           number: allergenData.nr,
           description: allergenData.beschreibung,
@@ -177,14 +200,15 @@ async function fetchAndSaveAllergens(date) {
       }
     }
     return allergens;
-  } catch (error) {
-    console.error("Fehler beim Abrufen der Allergene:", error);
+  }
+ catch (error) {
+    console.error('Fehler beim Abrufen der Allergene:', error);
     throw error;
   }
 }
 
 async function createAndSaveDishMenu(menu) {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().split('T')[0];
   let dailyMenu = await Menu.findOne({ date: today });
 
   if (!dailyMenu) {
@@ -192,7 +216,8 @@ async function createAndSaveDishMenu(menu) {
       date: today,
       dishes: [],
     });
-  } else {
+  }
+ else {
     dailyMenu.dishes = dailyMenu.dishes.map((dishId) => dishId.toString());
   }
 
@@ -230,47 +255,51 @@ async function createOrUpdateDish(dish, category) {
     await uploadAndAddDishcardUrlToDish(existingDish);
     existingDish.save();
     console.log(`Dish created: ${existingDish.name}`);
-  } else {
+  }
+ else {
     let needsUpdate = false;
 
     if (existingDish.price !== dish.price) {
       existingDish.price = dish.price;
       needsUpdate = true;
-      console.log("Updategrund: price ");
+      console.log('Updategrund: price ');
     }
-    if (JSON.stringify(existingDish.allergens) !== JSON.stringify(dish.allergens)) {
+    if (
+      JSON.stringify(existingDish.allergens) !== JSON.stringify(dish.allergens)
+    ) {
       existingDish.allergens = dish.allergens;
       needsUpdate = true;
     }
     if (existingDish.co2 !== dish.co2) {
       existingDish.co2 = dish.co2;
       needsUpdate = true;
-      console.log("Updategrund: co2 " + dish.co2);
+      console.log('Updategrund: co2 ' + dish.co2);
     }
     if (existingDish.h2o !== dish.h2o) {
       existingDish.h2o = dish.h2o;
       needsUpdate = true;
-      console.log("Updategrund: h2o " + dish.h2o);
+      console.log('Updategrund: h2o ' + dish.h2o);
     }
     if (existingDish.ampel !== dish.ampel) {
       existingDish.ampel = dish.ampel;
       needsUpdate = true;
-      console.log("Updategrund: ampel" + dish.ampel);
+      console.log('Updategrund: ampel' + dish.ampel);
     }
     if (existingDish.dietType !== dish.dietType) {
       existingDish.dietType = dish.dietType;
       needsUpdate = true;
-      console.log("Updategrund: diet" + dish.dietType);
+      console.log('Updategrund: diet' + dish.dietType);
     }
     if (!existingDish.dishCard) {
       needsUpdate = true;
       await uploadAndAddDishcardUrlToDish(existingDish);
-      console.log("Updategrund: dishcard " + existingDish.dishCard);
+      console.log('Updategrund: dishcard ' + existingDish.dishCard);
     }
     if (needsUpdate) {
       await existingDish.save();
       console.log(`Dish updated: ${existingDish.name}`);
-    } else {
+    }
+ else {
       console.log(`No updates needed for: ${existingDish.name}`);
     }
   }
@@ -279,57 +308,58 @@ async function createOrUpdateDish(dish, category) {
 
 async function getTodaysMenu(date) {
   try {
-    if (process.env.OVERRIDE_DATE === "true") {
-      date = "2023-12-20";
+    if (process.env.OVERRIDE_DATE === 'true') {
+      date = '2023-12-20';
     }
-    const dailyMenu = await Menu.findOne({ date: date }).populate("dishes");
+    const dailyMenu = await Menu.findOne({ date: date }).populate('dishes');
     return dailyMenu.dishes;
-  } catch (error) {
-    console.error("Error fetching today's menu:", error);
+  }
+ catch (error) {
+    console.error('Error fetching today\'s menu:', error);
     return [];
   }
 }
 
 function getWeekDayName(dayIndex) {
   const weekDays = [
-    "sonntag",
-    "montag",
-    "dienstag",
-    "mittwoch",
-    "donnerstag",
-    "freitag",
-    "samstag",
+    'sonntag',
+    'montag',
+    'dienstag',
+    'mittwoch',
+    'donnerstag',
+    'freitag',
+    'samstag',
   ];
   return weekDays[dayIndex];
 }
 
 async function getWeekMenu(date) {
-  let weekDays = getWeekDays(date); // Diese Funktion sollte ein Array von Date-Objekten zurückgeben
-  let weekMenu = new Map();
-  for (let day of weekDays) {
-    let dishes = await getTodaysMenu(day.toISOString().split("T")[0]);
-    let dayName = getWeekDayName(day.getDay());
+  const weekDays = getWeekDays(date);
+  const weekMenu = new Map();
+  for (const day of weekDays) {
+    const dishes = await getTodaysMenu(day.toISOString().split('T')[0]);
+    const dayName = getWeekDayName(day.getDay());
     weekMenu.set(dayName, dishes);
   }
   return weekMenu;
 }
 
 function getWeekDays(date) {
-  let currentDate = new Date(date);
+  const currentDate = new Date(date);
 
-  let currentDayOfWeek = currentDate.getDay();
+  const currentDayOfWeek = currentDate.getDay();
 
-  let differenceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+  const differenceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
 
-  let monday = new Date(currentDate);
+  const monday = new Date(currentDate);
   monday.setDate(monday.getDate() + differenceToMonday);
 
-  let weekDays = [];
+  const weekDays = [];
 
   for (let i = 0; i < 5; i++) {
-    let weekDay = new Date(monday);
+    const weekDay = new Date(monday);
     weekDay.setDate(monday.getDate() + i);
-    weekDays.push(weekDay); // Formatierung als "YYYY-MM-DD"
+    weekDays.push(weekDay);
   }
 
   return weekDays;

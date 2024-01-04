@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const allergenSchema = new Schema({
@@ -13,4 +13,4 @@ const allergenSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("Allergen", allergenSchema);
+module.exports = mongoose.model('Allergen', allergenSchema);

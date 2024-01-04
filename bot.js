@@ -1,20 +1,21 @@
-require("dotenv").config();
-const fs = require("node:fs");
-const path = require("node:path");
-const mongoose = require("./dbInit.js");
-const { fetchAndSaveDishes, fetchAndSaveAllergens } = require("./util/dish-menu-service.js");
-const { notify } = require("./util/notification-service.js");
-const cron = require("node-cron");
+require('dotenv').config();
+const fs = require('node:fs');
+const path = require('node:path');
+require('./dbInit.js');
+const {
+  fetchAndSaveDishes,
+  fetchAndSaveAllergens,
+} = require('./util/dish-menu-service.js');
+const { notify } = require('./util/notification-service.js');
+const cron = require('node-cron');
 
 const {
   Client,
   Collection,
   Events,
   GatewayIntentBits,
-  codeBlock,
-  ComponentType,
   Partials,
-} = require("discord.js");
+} = require('discord.js');
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -27,24 +28,27 @@ const client = new Client({
   partials: [Partials.Channel],
 });
 
-client.once("ready", () => {
-  console.log("Bot is online!");
-  fetchAndSaveDishes(new Date().toISOString().split("T")[0]);
-  //fetchAndSaveAllergens(new Date().toISOString().split("T")[0]);
+client.once('ready', () => {
+  console.log('Bot is online!');
+  fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
+  fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
 });
 
 client.commands = new Collection();
-const commandsPath = path.join(__dirname, "commands");
-const commandFiles = fs.readdirSync(commandsPath).filter((file) => file.endsWith(".js"));
+const commandsPath = path.join(__dirname, 'commands');
+const commandFiles = fs
+  .readdirSync(commandsPath)
+  .filter((file) => file.endsWith('.js'));
 
 for (const file of commandFiles) {
   const filePath = path.join(commandsPath, file);
   const command = require(filePath);
-  if ("data" in command && "execute" in command) {
+  if ('data' in command && 'execute' in command) {
     client.commands.set(command.data.name, command);
-  } else {
+  }
+ else {
     console.log(
-      `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+      `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
     );
   }
 }
@@ -61,10 +65,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   try {
     await command.execute(interaction);
-  } catch (error) {
+  }
+ catch (error) {
     console.error(error);
     await interaction.reply({
-      content: "There was an error while executing this command!",
+      content: 'There was an error while executing this command!',
       ephemeral: true,
     });
   }
@@ -72,19 +77,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 client.login(process.env.BOT_TOKEN);
 
-cron.schedule("0 9 * * *", async () => {
-  console.log("running a task every day at 9am");
+cron.schedule('0 9 * * *', async () => {
+  console.log('running a task every day at 9am');
   await notify(client);
 });
 
 client.on(Events.MessageCreate, async (message) => {
-  //testbereich
+  // testbereich
   if (message.author.bot) return;
-  if (message.author.id !== "130787506441420801") return;
-  if (message.content === "stats") {
+  if (message.author.id !== '130787506441420801') return;
+  if (message.content === 'stats') {
     const count = await getGuildCount();
     console.log(count);
-    message.reply("Anzahl an Servern: " + count);
+    message.reply('Anzahl an Servern: ' + count);
   }
 });
 

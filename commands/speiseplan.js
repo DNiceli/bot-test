@@ -9,74 +9,81 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-} = require("discord.js");
-const Favorite = require("../models/Favorite.js");
-const { getTodaysMenu } = require("../util/dish-menu-service.js");
-const User = require("../models/User.js");
-const Rating = require("../models/Rating.js");
+} = require('discord.js');
+const Favorite = require('../models/Favorite.js');
+const { getTodaysMenu } = require('../util/dish-menu-service.js');
+const User = require('../models/User.js');
+const Rating = require('../models/Rating.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("speiseplan")
-    .setDescription("sieht speiseplan in dishcard mit buttons")
+    .setName('speiseplan')
+    .setDescription('sieht speiseplan in dishcard mit buttons')
     .addStringOption((option) =>
       option
-        .setName("woche")
-        .setDescription("Woche")
+        .setName('woche')
+        .setDescription('Woche')
         .setRequired(false)
         .addChoices(
-          { name: "Diese Woche", value: "1" },
-          { name: "Nächste Woche", value: "2" },
-          { name: "Letzte Woche", value: "3" }
-        )
+          { name: 'Diese Woche', value: '1' },
+          { name: 'Nächste Woche', value: '2' },
+          { name: 'Letzte Woche', value: '3' },
+        ),
     )
     .addStringOption((option) =>
       option
-        .setName("wochentag")
-        .setDescription("Wochentag")
+        .setName('wochentag')
+        .setDescription('Wochentag')
         .setRequired(false)
         .addChoices(
-          { name: "Sonntag", value: "0" },
-          { name: "Montag", value: "1" },
-          { name: "Dienstag", value: "2" },
-          { name: "Mittwoch", value: "3" },
-          { name: "Donnerstag", value: "4" },
-          { name: "Feitag", value: "5" },
-          { name: "Samstag", value: "6" }
-        )
+          { name: 'Sonntag', value: '0' },
+          { name: 'Montag', value: '1' },
+          { name: 'Dienstag', value: '2' },
+          { name: 'Mittwoch', value: '3' },
+          { name: 'Donnerstag', value: '4' },
+          { name: 'Feitag', value: '5' },
+          { name: 'Samstag', value: '6' },
+        ),
     ),
   async execute(interaction) {
     try {
       await interaction.deferReply({ ephemeral: true });
-      const woche = interaction.options.getString("woche");
-      const wochentag = interaction.options.getString("wochentag");
+      const woche = interaction.options.getString('woche');
+      const wochentag = interaction.options.getString('wochentag');
       console.log(woche, wochentag);
       let date;
-      if (woche && !wochentag)
-        return await interaction.editReply("Bitte gib eine Woche und einen Wochentag an.");
-      if (!woche && wochentag) date = getDateForWeekday("1", wochentag);
-      else if (woche && wochentag) {
-        date = getDateForWeekday(woche, wochentag);
-      } else {
-        date = new Date().toISOString().split("T")[0];
+      if (woche && !wochentag) {
+        return await interaction.editReply(
+          'Bitte gib eine Woche und einen Wochentag an.',
+        );
       }
-      let userAllergens = await findOrCreateUserAllergens(interaction);
-      let menuImgs = [];
+      if (!woche && wochentag) {
+        date = getDateForWeekday('1', wochentag);
+      }
+ else if (woche && wochentag) {
+        date = getDateForWeekday(woche, wochentag);
+      }
+ else {
+        date = new Date().toISOString().split('T')[0];
+      }
+      const userAllergens = await findOrCreateUserAllergens(interaction);
+      const menuImgs = [];
       let dailyMenu;
       try {
         dailyMenu = await getTodaysMenu(date);
-      } catch (error) {
-        console.error(error);
-        await interaction.editReply("Es ist kein Menü für heute vorhanden.");
       }
-      //console.log(dailyMenu.map((dish) => dish.name).join(", "));           possibly openAi keyword generation for dishes to generate recommendations
+ catch (error) {
+        console.error(error);
+        await interaction.editReply('Es ist kein Menü für heute vorhanden.');
+      }
+      // console.log(dailyMenu.map((dish) => dish.name).join(", "));           possibly openAi keyword generation for dishes to generate recommendations
 
       await populateMenuImgs(dailyMenu, userAllergens, menuImgs);
       sizeOf(menuImgs);
-      const components = createDishSelectMenu(menuImgs); //create select menus option for each dish
+      const components = createDishSelectMenu(menuImgs);
 
-      response = await interaction.editReply({
-        content: "Adjust the settings here:",
+      const response = await interaction.editReply({
+        content: 'Adjust the settings here:',
         components: components,
         fetchReply: true,
         ephemeral: true,
@@ -88,61 +95,89 @@ module.exports = {
             i.componentType === ComponentType.StringSelect ||
             i.componentType === ComponentType.Modal) &&
           i.user.id === interaction.user.id,
-        time: 300_000, // Reduced time to 5 minutes
+        time: 300_000,
       });
 
       let currentDish;
-      collector.on("collect", async (i) => {
+      collector.on('collect', async (i) => {
         if (i.isStringSelectMenu()) {
           currentDish = i.values[0];
-          let img = menuImgs.find((dish) => dish.name === currentDish).dishCard;
-          await interaction.editReply({ content: "You selected " + currentDish, files: [img] });
-          await i.update("You selected " + currentDish);
-        } else if (i.isButton()) {
+          const img = menuImgs.find(
+            (dish) => dish.name === currentDish,
+          ).dishCard;
+          await interaction.editReply({
+            content: 'You selected ' + currentDish,
+            files: [img],
+          });
+          await i.update('You selected ' + currentDish);
+        }
+ else if (i.isButton()) {
           switch (i.customId) {
-            case "submit":
+            case 'submit':
               await i.deferUpdate();
-              console.log("sub");
+              console.log('sub');
               break;
-            case "favorite":
+            case 'favorite': {
               if (!i.guild) return;
               if (!currentDish) {
-                await i.deferUpdate(); // TODO: Tell User to choose Dish first
+                await i.deferUpdate();
+                // TODO: Tell User to choose Dish first
                 return;
               }
-              var currentDishId = menuImgs.find((dish) => dish.name === currentDish)._id;
-              var guild = i.guild.id;
-              var userID = i.user.id;
-              let bool = await Favorite.createOrUpdateFavorite(userID, guild, currentDishId);
+              const currentDishId = menuImgs.find(
+                (dish) => dish.name === currentDish,
+              )._id;
+              const guild = i.guild.id;
+              const userID = i.user.id;
+              const bool = await Favorite.createOrUpdateFavorite(
+                userID,
+                guild,
+                currentDishId,
+              );
               if (bool) {
-                interaction.editReply({ content: "Added to favorites: " + currentDish });
-              } else {
-                interaction.editReply({ content: "Already in favorites: " + currentDish });
+                interaction.editReply({
+                  content: 'Added to favorites: ' + currentDish,
+                });
+              }
+ else {
+                interaction.editReply({
+                  content: 'Already in favorites: ' + currentDish,
+                });
               }
               await i.deferUpdate();
               break;
-            case "rate":
+            }
+            case 'rate': {
               if (!currentDish) {
-                await i.deferUpdate(); // TODO: Tell User to choose Dish first
+                await i.deferUpdate();
+                // TODO: Tell User to choose Dish first
                 return;
               }
-              let dishname = menuImgs.find((dish) => dish.name === currentDish).name;
-              let dishId = menuImgs.find((dish) => dish.name === currentDish)._id;
-              let modal = createRateModal(dishname); // problem: dishname is undefined
+              const dishname = menuImgs.find(
+                (dish) => dish.name === currentDish,
+              ).name;
+              const dishId = menuImgs.find(
+                (dish) => dish.name === currentDish,
+              )._id;
+              const modal = createRateModal(dishname);
+              // problem: dishname is undefined
               await i.showModal(modal);
               const submission = await i.awaitModalSubmit({ time: 60_000 });
               await handleSubmission(submission, dishId, currentDish);
               break;
-            case "close":
-              console.log("close");
+            }
+            case 'close': {
+              console.log('close');
               await i.deferUpdate();
               break;
+            }
           }
         }
       });
-    } catch (error) {
+    }
+ catch (error) {
       console.error(error);
-      await interaction.editReply("Es gab einen Fehler bei der Ausführung.");
+      await interaction.editReply('Es gab einen Fehler bei der Ausführung.');
     }
   },
 };
@@ -157,10 +192,13 @@ function sizeOf(menuImgs) {
 
 async function handleSubmission(submission, dishId, currentDish) {
   if (!submission) {
-    submission.update({ content: "You did not provide a rating" });
-  } else if (submission.isModalSubmit()) {
+    submission.update({ content: 'You did not provide a rating' });
+  }
+ else if (submission.isModalSubmit()) {
     if (!submission.components[0].components[0].value) {
-      await submission.update({ content: "Please enter a value between 1 and 5" });
+      await submission.update({
+        content: 'Please enter a value between 1 and 5',
+      });
       return;
     }
     if (
@@ -168,39 +206,48 @@ async function handleSubmission(submission, dishId, currentDish) {
       submission.components[0].components[0].value > 5 ||
       submission.components[0].components[0].value < 1
     ) {
-      await submission.update({ content: "Please enter a value between 1 and 5" });
+      await submission.update({
+        content: 'Please enter a value between 1 and 5',
+      });
       return;
     }
     const ratingValue = submission.components[0].components[0].value;
     const ratingComment = submission.components[1].components[0].value;
     const userId = submission.user.id;
-    await Rating.createOrUpdateRating(userId, dishId, ratingValue, ratingComment);
+    await Rating.createOrUpdateRating(
+      userId,
+      dishId,
+      ratingValue,
+      ratingComment,
+    );
     await submission.update({
-      content: "You rated " + currentDish + " with " + ratingValue,
+      content: 'You rated ' + currentDish + ' with ' + ratingValue,
     });
   }
 }
-//
+
 function createRateModal(dishname) {
   if (dishname.length > 45) dishname = dishname.substring(0, 45);
-  const modal = new ModalBuilder().setCustomId("rate").setTitle(dishname);
+  const modal = new ModalBuilder().setCustomId('rate').setTitle(dishname);
   const rateInput = new TextInputBuilder()
-    .setCustomId("value")
-    .setLabel("Wie würdest du das Gericht bewerten? (1-5)")
+    .setCustomId('value')
+    .setLabel('Wie würdest du das Gericht bewerten? (1-5)')
     .setStyle(TextInputStyle.Short)
     .setMinLength(1)
     .setMaxLength(1)
     .setRequired(true);
 
   const rateInputComment = new TextInputBuilder()
-    .setCustomId("comment")
-    .setLabel("Optional: Dein Kommentar zur Bewertung")
+    .setCustomId('comment')
+    .setLabel('Optional: Dein Kommentar zur Bewertung')
     .setStyle(TextInputStyle.Paragraph)
     .setMaxLength(256)
     .setRequired(false);
 
   const firstActionRow = new ActionRowBuilder().addComponents(rateInput);
-  const secondActionRow = new ActionRowBuilder().addComponents(rateInputComment);
+  const secondActionRow = new ActionRowBuilder().addComponents(
+    rateInputComment,
+  );
   modal.addComponents(firstActionRow, secondActionRow);
   return modal;
 }
@@ -211,7 +258,9 @@ async function populateMenuImgs(dailyMenu, userAllergens, menuImgs) {
       userAllergens?.length > 0 &&
       dish.allergens?.length > 0 &&
       userAllergens.some((userAllergen) =>
-        dish.allergens.find((dishAllergen) => dishAllergen.number === userAllergen.number)
+        dish.allergens.find(
+          (dishAllergen) => dishAllergen.number === userAllergen.number,
+        ),
       );
     if (shouldSkipDish) {
       continue;
@@ -231,7 +280,8 @@ async function findOrCreateUserAllergens(interaction) {
       allergens: [],
     });
     await user.save();
-  } else {
+  }
+ else {
     userAllergens = user.allergens;
   }
   return userAllergens;
@@ -239,11 +289,11 @@ async function findOrCreateUserAllergens(interaction) {
 
 function createDishSelectMenu(menuImgs) {
   const components = [];
-  let selectMenu = new StringSelectMenuBuilder()
-    .setCustomId("dishes")
-    .setPlaceholder("Choose a dish");
+  const selectMenu = new StringSelectMenuBuilder()
+    .setCustomId('dishes')
+    .setPlaceholder('Choose a dish');
 
-  for (let dish of menuImgs) {
+  for (const dish of menuImgs) {
     const option = new StringSelectMenuOptionBuilder()
       .setLabel(dish.name)
       .setDescription(dish.category)
@@ -254,13 +304,22 @@ function createDishSelectMenu(menuImgs) {
   components.push(new ActionRowBuilder().addComponents(selectMenu));
 
   const buttonRow = new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId("submit").setLabel("Submit").setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
-      .setCustomId("favorite")
-      .setLabel("Favorite")
+      .setCustomId('submit')
+      .setLabel('Submit')
+      .setStyle(ButtonStyle.Primary),
+    new ButtonBuilder()
+      .setCustomId('favorite')
+      .setLabel('Favorite')
       .setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId("rate").setLabel("Rate").setStyle(ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId("close").setLabel("Close").setStyle(ButtonStyle.Secondary)
+    new ButtonBuilder()
+      .setCustomId('rate')
+      .setLabel('Rate')
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId('close')
+      .setLabel('Close')
+      .setStyle(ButtonStyle.Secondary),
   );
   components.push(buttonRow);
   return components;
@@ -272,20 +331,20 @@ function getDateForWeekday(weekChoice, weekdayChoice) {
 
   let date;
   switch (weekChoice) {
-    case "1": // Diese Woche
+    case '1':
       date = new Date(today);
       date.setDate(today.getDate() + (weekdayChoice - currentWeekday));
       break;
-    case "2": // Nächste Woche
+    case '2':
       date = new Date(today);
       date.setDate(today.getDate() + 7 + (weekdayChoice - currentWeekday));
       break;
-    case "3": // Letzte Woche
+    case '3':
       date = new Date(today);
       date.setDate(today.getDate() - 7 + (weekdayChoice - currentWeekday));
       break;
   }
   console.log(date);
 
-  return date.toISOString().split("T")[0];
+  return date.toISOString().split('T')[0];
 }

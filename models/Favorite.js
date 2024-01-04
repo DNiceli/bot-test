@@ -1,30 +1,30 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const favoriteSchema = new Schema(
   {
     userId: {
       type: String,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     guildId: {
       type: String,
-      ref: "Guild",
+      ref: 'Guild',
       required: true,
     },
     dishId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Dish",
+      ref: 'Dish',
       required: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-const Favorite = mongoose.model("Favorite", favoriteSchema);
+const Favorite = mongoose.model('Favorite', favoriteSchema);
 
 async function createOrUpdateFavorite(userId, guildId, dishId) {
   const existingFav = await Favorite.findOne({
@@ -40,38 +40,46 @@ async function createOrUpdateFavorite(userId, guildId, dishId) {
         guildId: guildId,
         dishId: dishId,
       });
-      console.log(`Fav created User: ${userId} Dish: ${dishId} Guild: ${guildId}`);
+      console.log(
+        `Fav created User: ${userId} Dish: ${dishId} Guild: ${guildId}`,
+      );
       return true;
-    } catch (err) {
-      console.error(`Could not create Fav User: ${userId}: Dish: ${dishId} Guild: ${guildId}`, err);
+    }
+ catch (err) {
+      console.error(
+        `Could not create Fav User: ${userId}: Dish: ${dishId} Guild: ${guildId}`,
+        err,
+      );
       return false;
     }
-  } else {
-    console.log("Fav already exists");
+  }
+ else {
+    console.log('Fav already exists');
     return false;
   }
 }
 
-getFavorites = async (userId) => {
+async function getFavorites(userId) {
   const favorites = await Favorite.find({
     userId: userId,
   });
   if (!favorites) {
-    console.log("No favorites found");
+    console.log('No favorites found');
     return;
   }
   return favorites;
-};
+}
 
 async function getMostFavoritedDishes() {
   try {
     return await Favorite.aggregate([
       {
-        $group: { _id: "$dishId", totalQuantity: { $count: {} } },
+        $group: { _id: '$dishId', totalQuantity: { $count: {} } },
       },
     ]);
-  } catch (error) {
-    console.error("Error fetching most favorited dishes:", error);
+  }
+ catch (error) {
+    console.error('Error fetching most favorited dishes:', error);
     return [];
   }
 }

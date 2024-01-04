@@ -1,16 +1,16 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const ratingSchema = new Schema(
   {
     userId: {
       type: String,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     dishId: {
       type: String,
-      ref: "Dish",
+      ref: 'Dish',
       required: true,
     },
     score: {
@@ -21,19 +21,27 @@ const ratingSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-ratingSchema.statics.getAverageRating = async function (dishId) {
+ratingSchema.statics.getAverageRating = async function(dishId) {
   const ratings = await this.find({ dishId: dishId });
   if (ratings.length === 0) {
     return 0;
   }
-  const sum = ratings.reduce((accumulator, rating) => accumulator + rating.score, 0);
+  const sum = ratings.reduce(
+    (accumulator, rating) => accumulator + rating.score,
+    0,
+  );
   return sum / ratings.length;
 };
 
-ratingSchema.statics.createOrUpdateRating = async function (userId, dishId, score, comment = "") {
+ratingSchema.statics.createOrUpdateRating = async function(
+  userId,
+  dishId,
+  score,
+  comment = '',
+) {
   const existingFav = await Rating.findOne({
     userId: userId,
     dishId: dishId,
@@ -49,11 +57,16 @@ ratingSchema.statics.createOrUpdateRating = async function (userId, dishId, scor
       });
       console.log(`Rating created User: ${userId} Dish: ${dishId}`);
       return true;
-    } catch (err) {
-      console.error(`Could not create Rating User: ${userId}: Dish: ${dishId}`, err);
+    }
+ catch (err) {
+      console.error(
+        `Could not create Rating User: ${userId}: Dish: ${dishId}`,
+        err,
+      );
       return false;
     }
-  } else {
+  }
+ else {
     existingFav.score = score;
     existingFav.comment = comment;
     existingFav.save();
@@ -62,5 +75,5 @@ ratingSchema.statics.createOrUpdateRating = async function (userId, dishId, scor
   }
 };
 
-const Rating = mongoose.model("Rating", ratingSchema);
+const Rating = mongoose.model('Rating', ratingSchema);
 module.exports = Rating;

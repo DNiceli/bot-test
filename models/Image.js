@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const imageSchema = new mongoose.Schema({
   url: {
@@ -7,6 +7,6 @@ const imageSchema = new mongoose.Schema({
   },
 });
 
-const Image = mongoose.model("Image", imageSchema);
+const Image = mongoose.model('Image', imageSchema);
 
 module.exports = Image;

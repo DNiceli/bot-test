@@ -1,39 +1,25 @@
-const sharp = require("sharp");
-const puppeteer = require("puppeteer");
-const { uploadImageBuffer } = require("./image-creation-service");
-const path = require("path");
-
-async function generateMenuCard2(dish) {
-  const svgTemplate = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
-    <rect x="0" y="0" width="400" height="200" fill="#f8f8f8" />
-    <text x="20" y="40" font-size="24" font-weight="bold" fill="#333333">__NAME__</text>
-    <text x="20" y="80" font-size="18" fill="#333333">Price: __PRICE__</text>
-    <text x="20" y="120" font-size="18" fill="#333333">Allergens: __ALLERGENS__</text>
-  </svg>`;
-
-  const svgData = svgTemplate
-    .replace("__NAME__", dish.name)
-    .replace("__PRICE__", dish.price)
-    .replace("__ALLERGENS__", dish.allergens);
-
-  console.log(svgData);
-
-  const pngBuffer = await sharp(Buffer.from(svgData)).png().toBuffer();
-  return pngBuffer;
-}
+const puppeteer = require('puppeteer');
+const { uploadImageBuffer } = require('./image-creation-service');
+const path = require('path');
 
 async function generateMenuImage(weekMenus) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  let htmlPath = path.join(__dirname, "../template/weekMenu.html");
+  const htmlPath = path.join(__dirname, '../template/weekMenu.html');
 
-  const weekMenusArray = Array.from(weekMenus).map(([day, dishes]) => ({ day, dishes }));
+  const weekMenusArray = Array.from(weekMenus).map(([day, dishes]) => ({
+    day,
+    dishes,
+  }));
 
   console.log(weekMenusArray);
 
   await page.setViewport({ width: 1920, height: 1080 });
   await page.goto(`file://${htmlPath}`);
-
+  /* eslint no-shadow: ["error", { "allow": ["weekMenusArray"] }]*/
+  /* eslint-env es6*/
+  /* global document*/
+  /* eslint no-undef: "error"*/
   await page.evaluate((weekMenusArray) => {
     function fillMenuTemplate(weekMenusArray) {
       weekMenusArray.forEach(({ day, dishes }) => {
@@ -51,28 +37,28 @@ async function generateMenuImage(weekMenus) {
     }
 
     function createDishElement(dish) {
-      const dishDiv = document.createElement("div");
-      dishDiv.className = "dish";
+      const dishDiv = document.createElement('div');
+      dishDiv.className = 'dish';
 
-      const nameEl = document.createElement("h3");
+      const nameEl = document.createElement('h3');
       nameEl.textContent = dish.name;
       dishDiv.appendChild(nameEl);
 
-      const detailsEl = document.createElement("p");
+      const detailsEl = document.createElement('p');
       detailsEl.innerHTML = `
           <strong>Kategorie:</strong> ${dish.category}<br>
           <strong>Preis:</strong> ${dish.price}<br>
-          <strong>CO2-Emissionen:</strong> ${dish.co2 || "N/A"}<br>
-          <strong>H2O-Verbrauch:</strong> ${dish.h2o || "N/A"}<br>
+          <strong>CO2-Emissionen:</strong> ${dish.co2 || 'N/A'}<br>
+          <strong>H2O-Verbrauch:</strong> ${dish.h2o || 'N/A'}<br>
           <strong>Ampel:</strong> ${dish.ampel}<br>
           <strong>Diättyp:</strong> ${dish.dietType}
       `;
       dishDiv.appendChild(detailsEl);
 
       if (dish.allergens && dish.allergens.length > 0) {
-        const allergensEl = document.createElement("ul");
+        const allergensEl = document.createElement('ul');
         dish.allergens.forEach((allergen) => {
-          const allergenItem = document.createElement("li");
+          const allergenItem = document.createElement('li');
           allergenItem.textContent = `${allergen.description} (${allergen.number})`;
           allergensEl.appendChild(allergenItem);
         });
@@ -84,30 +70,32 @@ async function generateMenuImage(weekMenus) {
     fillMenuTemplate(weekMenusArray);
   }, weekMenusArray);
 
-  const buffer = await page.screenshot({ format: "png", fullPage: true });
+  const buffer = await page.screenshot({ format: 'png', fullPage: true });
   await browser.close();
   return buffer;
 }
 
 async function generateMenuCard(dish) {
   const categoryColors = {
-    Vorspeisen: "#FFDAB9",
-    Essen: "#ADD8E6",
-    Salate: "#FFFACD",
-    Suppen: "#FFFACD",
-    Beilagen: "#FFFACD",
-    Desserts: "#FFFACD",
-    Aktionen: "#E6E6FA",
+    Vorspeisen: '#FFDAB9',
+    Essen: '#ADD8E6',
+    Salate: '#FFFACD',
+    Suppen: '#FFFACD',
+    Beilagen: '#FFFACD',
+    Desserts: '#FFFACD',
+    Aktionen: '#E6E6FA',
   };
 
-  const color = categoryColors[dish.category] || "#FFFFFF"; // default to white if category is unknown
+  const color = categoryColors[dish.category] || '#FFFFFF';
 
-  let dishImage = await dish.populate("imageId");
+  const dishImage = await dish.populate('imageId');
 
-  let url = dishImage.imageId.url;
-  let allergens = "";
+  const url = dishImage.imageId.url;
+  let allergens = '';
   if (dish.allergens.length > 0) {
-    allergens = dish.allergens.map((allergen) => allergen.description).join(", ");
+    allergens = dish.allergens
+      .map((allergen) => allergen.description)
+      .join(', ');
   }
   const htmlTemplate = `
     <!DOCTYPE html>
@@ -171,11 +159,11 @@ async function generateMenuCard(dish) {
   const page = await browser.newPage();
   await page.setContent(htmlTemplate);
   const pngBuffer = await page.screenshot({
-    type: "png",
+    type: 'png',
     clip: { x: 0, y: 0, width: 400, height: 200 },
   });
   await browser.close();
-  let returnObject = {
+  const returnObject = {
     id: dish._id,
     image: pngBuffer,
     name: dish.name,
@@ -185,8 +173,8 @@ async function generateMenuCard(dish) {
 }
 
 async function uploadAndAddDishcardUrlToDish(dish) {
-  let dishCardObj = await generateMenuCard(dish);
-  let dishCard = await uploadImageBuffer(dishCardObj.image);
+  const dishCardObj = await generateMenuCard(dish);
+  const dishCard = await uploadImageBuffer(dishCardObj.image);
   dish.dishCard = dishCard.url;
   return dish;
 }

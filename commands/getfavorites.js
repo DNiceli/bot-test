@@ -1,12 +1,12 @@
-require("dotenv").config();
-const { SlashCommandBuilder } = require("discord.js");
-const { getFavorites } = require("../models/Favorite.js");
-const { Dish } = require("../models/Dish.js");
+require('dotenv').config();
+const { SlashCommandBuilder } = require('discord.js');
+const { getFavorites } = require('../models/Favorite.js');
+const { Dish } = require('../models/Dish.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("get-favorites")
-    .setDescription("Zeigt deine Lieblingsgerichte an"),
+    .setName('get-favorites')
+    .setDescription('Zeigt deine Lieblingsgerichte an'),
   async execute(interaction) {
     try {
       await interaction.deferReply();
@@ -15,33 +15,36 @@ module.exports = {
 
       const favorites = await getFavorites(userId, guildId);
       if (!favorites) {
-        await interaction.editReply("Du hast noch keine Gerichte favorisiert.");
+        await interaction.editReply('Du hast noch keine Gerichte favorisiert.');
         return;
-      } else {
+      }
+ else {
         const favoriteDishes = await getFavoriteDishes(favorites);
 
-        favoriteDishesToStringSeparatedByComma = favoriteDishes.join(", ");
+        const favoriteDishesToStringSeparatedByComma =
+          favoriteDishes.join(', ');
 
         interaction.user.send(
-          "Deine Lieblingsgerichte: " + favoriteDishesToStringSeparatedByComma
+          'Deine Lieblingsgerichte: ' + favoriteDishesToStringSeparatedByComma,
         );
 
         await interaction.editReply({
           content:
-            "Deine Lieblingsgerichte: " +
+            'Deine Lieblingsgerichte: ' +
             favoriteDishesToStringSeparatedByComma,
         });
       }
-    } catch (error) {
+    }
+ catch (error) {
       console.error(error);
       await interaction.editReply(
-        "Es gab einen Fehler beim Favorisieren des Gerichts."
+        'Es gab einen Fehler beim Favorisieren des Gerichts.',
       );
     }
   },
 };
 
-getFavoriteDishes = async (favorites) => {
+async function getFavoriteDishes(favorites) {
   const favoriteDishes = [];
   for (const favorite of favorites) {
     const dish = await Dish.findOne({ id: favorite.dishId });
@@ -50,4 +53,4 @@ getFavoriteDishes = async (favorites) => {
     }
   }
   return favoriteDishes;
-};
+}

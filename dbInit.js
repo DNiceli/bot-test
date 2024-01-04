@@ -1,5 +1,5 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
+require('dotenv').config();
+const mongoose = require('mongoose');
 
 const uri = process.env.mongoDBuri;
 
@@ -10,10 +10,10 @@ mongoose
     serverSelectionTimeoutMS: 5000,
   })
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log('Connected to MongoDB');
   })
   .catch((err) => {
-    console.error("MongoDB connection failed:", err);
+    console.error('MongoDB connection failed:', err);
   });
 
 module.exports = mongoose;

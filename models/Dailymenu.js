@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const dailymenuSchema = new mongoose.Schema({
   dishes: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Dish",
+      ref: 'Dish',
       required: true,
     },
   ],
@@ -14,6 +14,6 @@ const dailymenuSchema = new mongoose.Schema({
   },
 });
 
-const Dailymenu = mongoose.model("Dailymenu", dailymenuSchema);
+const Dailymenu = mongoose.model('Dailymenu', dailymenuSchema);
 
 module.exports = Dailymenu;
