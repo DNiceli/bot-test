@@ -62,7 +62,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     console.error(`No command matching ${interaction.commandName} was found.`);
     return;
   }
-
   try {
     await command.execute(interaction);
   }
@@ -73,6 +72,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       ephemeral: true,
     });
   }
+});
+
+process.on('unhandledRejection', (error) => {
+  console.error('Unhandled promise rejection:', error);
 });
 
 client.login(process.env.BOT_TOKEN);
