@@ -2,30 +2,16 @@ require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
 require('./dbInit.js');
-const {
-  fetchAndSaveDishes,
-  fetchAndSaveAllergens,
-} = require('./util/dish-menu-service.js');
+// prettier-ignore
+const { fetchAndSaveDishes, fetchAndSaveAllergens } = require('./util/dish-menu-service.js');
 const { notify } = require('./util/notification-service.js');
 const cron = require('node-cron');
-
-const {
-  Client,
-  Collection,
-  Events,
-  GatewayIntentBits,
-  Partials,
-} = require('discord.js');
+// prettier-ignore
+const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
+// prettier-ignore
 const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMessageReactions,
-    GatewayIntentBits.DirectMessages,
-  ],
-  partials: [Partials.Channel],
+  intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages ],
+  partials: [ Partials.Channel ],
 });
 
 client.once('ready', () => {

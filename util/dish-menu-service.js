@@ -48,6 +48,7 @@ async function fetchAndSaveDishes(date) {
                 .find('img.splIcon')
                 .map((i, elem) => {
                   const altText = $(elem).attr('alt');
+                  console.log(altText);
                   if (altText.includes('Vegan')) {
                     return 'vegan';
                   }
