@@ -110,25 +110,15 @@ function extractIconInfo($, meal) {
 
 async function fetchAndSaveAllergens(date) {
   try {
-    const allergens = [];
     const $ = await requestSiteAndLoadHTML(date, '527');
+    const allergens = extractAllergens($);
+    return await updateOldOrSaveNewAllergens(allergens);
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Allergene:', error);
+    throw error;
+  }
 
-    $('input.itemkennz').each((_, element) => {
-      const id = $(element).attr('id').replace('stoff-', '');
-      let description =
-        $(element).next('span').attr('title') ||
-        $(element).parent().text().trim();
-
-      // regex um die Nummerierung mit ggf einem Buchstaben zu entfernen
-      description = description.replace(/^\(\d+[a-zA-Z]?\)\s*/, '');
-
-      const allergen = {
-        nr: id,
-        beschreibung: description,
-      };
-      allergens.push(allergen);
-    });
-
+  async function updateOldOrSaveNewAllergens(allergens) {
     for (const allergenData of allergens) {
       const existingAllergen = await Allergen.findOne({
         number: allergenData.nr,
@@ -148,10 +138,28 @@ async function fetchAndSaveAllergens(date) {
       }
     }
     return allergens;
-  } catch (error) {
-    console.error('Fehler beim Abrufen der Allergene:', error);
-    throw error;
   }
+}
+
+function extractAllergens($) {
+  const allergens = [];
+
+  $('input.itemkennz').each((_, element) => {
+    const id = $(element).attr('id').replace('stoff-', '');
+    let description =
+      $(element).next('span').attr('title') ||
+      $(element).parent().text().trim();
+
+    // regex um die Nummerierung mit ggf einem Buchstaben zu entfernen
+    description = description.replace(/^\(\d+[a-zA-Z]?\)\s*/, '');
+
+    const allergen = {
+      nr: id,
+      beschreibung: description,
+    };
+    allergens.push(allergen);
+  });
+  return allergens;
 }
 
 async function requestSiteAndLoadHTML(date, resources_id) {
