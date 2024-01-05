@@ -61,15 +61,17 @@ module.exports = {
       } else if (woche && wochentag) {
         date = getDateForWeekday(woche, wochentag);
       }
-      const userAllergens = await findOrCreateUserAllergens(interaction);
-      const menuImgs = [];
       let dailyMenu;
       try {
         dailyMenu = await getTodaysMenu(date);
       } catch (error) {
         console.error(error);
-        await interaction.editReply('Es ist kein Menü für heute vorhanden.');
+        await interaction.editReply(
+          `Es ist kein Menü für das Datum ${date} vorhanden.`,
+        );
       }
+      const userAllergens = await findOrCreateUserAllergens(interaction);
+      const menuImgs = [];
       // console.log(dailyMenu.map((dish) => dish.name).join(", "));           possibly openAi keyword generation for dishes to generate recommendations
 
       await populateMenuImgs(dailyMenu, userAllergens, menuImgs);
