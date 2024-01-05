@@ -50,8 +50,7 @@ module.exports = {
       await interaction.deferReply({ ephemeral: true });
       const woche = interaction.options.getString('woche');
       const wochentag = interaction.options.getString('wochentag');
-      console.log(woche, wochentag);
-      let date;
+      let date = new Date().toISOString().split('T')[0];
       if (woche && !wochentag) {
         return await interaction.editReply(
           'Bitte gib eine Woche und einen Wochentag an.',
@@ -61,8 +60,6 @@ module.exports = {
         date = getDateForWeekday('1', wochentag);
       } else if (woche && wochentag) {
         date = getDateForWeekday(woche, wochentag);
-      } else {
-        date = new Date().toISOString().split('T')[0];
       }
       const userAllergens = await findOrCreateUserAllergens(interaction);
       const menuImgs = [];
@@ -321,21 +318,20 @@ function getDateForWeekday(weekChoice, weekdayChoice) {
   const today = new Date();
   const currentWeekday = today.getDay();
 
-  let date;
+  const date = new Date(today);
+  date.setDate(today.getDate() - currentWeekday + weekdayChoice);
+
   switch (weekChoice) {
     case '1':
-      date = new Date(today);
-      date.setDate(today.getDate() + (weekdayChoice - currentWeekday));
       break;
     case '2':
-      date = new Date(today);
-      date.setDate(today.getDate() + 7 + (weekdayChoice - currentWeekday));
+      date.setDate(date.getDate() + 7);
       break;
     case '3':
-      date = new Date(today);
-      date.setDate(today.getDate() - 7 + (weekdayChoice - currentWeekday));
+      date.setDate(date.getDate() - 7);
       break;
   }
+
   console.log(date);
 
   return date.toISOString().split('T')[0];
