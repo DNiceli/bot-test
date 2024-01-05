@@ -9,11 +9,11 @@ const { uploadAndAddDishcardUrlToDish } = require('./speiseplan-util.js');
 
 async function fetchAndSaveDishes(date) {
   try {
-    const menu = new Map();
-    let allergens = await Allergen.find();
-    if (!allergens) {
-      allergens = await fetchAndSaveAllergens();
+    let allergenDb = await Allergen.find();
+    if (!allergenDb) {
+      allergenDb = await fetchAndSaveAllergens();
     }
+    const menu = new Map();
     const $ = await requestSiteAndLoadHTML(date, '527');
     /* eslint no-shadow: ["error", { "allow": ["_"] }]*/
     /* eslint-env es6*/
@@ -23,36 +23,9 @@ async function fetchAndSaveDishes(date) {
       $(groupWrapper)
         .find('.row.splMeal')
         .each(async (_, meal) => {
-          const [dietType, ampelColor, h2o, co2] = extractIconInfo($, meal);
-          const dishname = $(meal)
-            .find('.col-xs-6.col-md-5 > .bold')
-            .text()
-            .trim();
-          const price = $(meal)
-            .find('.col-xs-12.col-md-3.text-right')
-            .text()
-            .trim();
-          const allergensDish = $(meal)
-            .find('div.kennz.ptr.toolt table tr')
-            .map((i, elem) => $(elem).find('td').eq(1).text().trim())
-            .get()
-            .map((allergenDesc) => allergenLookup(allergenDesc, allergens))
-            .filter((allergen) => allergen !== null);
-          const dish = {
-            name: dishname,
-            price: price,
-            allergens: allergensDish,
-            ampel: ampelColor,
-            h2o: h2o,
-            co2: co2,
-            dietType: dietType,
-          };
-          if (!dish.allergens) {
-            dish.allergens = [];
-          }
+          const dish = extractDishInfo($, meal, allergenDb);
           dishes.push(dish);
         });
-
       menu.set(group, dishes);
     });
     createAndSaveDishMenu(menu);
@@ -60,6 +33,30 @@ async function fetchAndSaveDishes(date) {
   } catch (error) {
     console.error(error);
   }
+}
+
+function extractDishInfo($, meal, allergenDb) {
+  const [dietType, ampel, h2o, co2] = extractIconInfo($, meal);
+  const name = $(meal).find('.col-xs-6.col-md-5 > .bold').text().trim();
+  const price = $(meal).find('.col-xs-12.col-md-3.text-right').text().trim();
+  const allergens = $(meal)
+    .find('div.kennz.ptr.toolt table tr')
+    .map((i, elem) => $(elem).find('td').eq(1).text().trim())
+    .get()
+    .map((allergenDesc) => allergenLookup(allergenDesc, allergenDb))
+    .filter((allergen) => allergen !== null);
+
+  const dish = {
+    name: name,
+    price: price,
+    allergens: allergens.length ? allergens : [],
+    ampel: ampel,
+    h2o: h2o,
+    co2: co2,
+    dietType: dietType,
+  };
+  console.log(dish);
+  return dish;
 }
 
 const allergenLookup = (description, allergens) => {
@@ -108,7 +105,7 @@ function extractIconInfo($, meal) {
           .split('CO2')[0];
       }
     });
-  return { dietType, ampelColor, h2o, co2 };
+  return [dietType, ampelColor, h2o, co2];
 }
 
 async function fetchAndSaveAllergens(date) {
