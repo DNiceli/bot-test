@@ -55,7 +55,6 @@ function extractDishInfo($, meal, allergenDb) {
     co2: co2,
     dietType: dietType,
   };
-  console.log(dish);
   return dish;
 }
 
@@ -137,6 +136,7 @@ async function fetchAndSaveAllergens(date) {
         await newAllergen.save();
       }
     }
+    console.log('Allergene aktualisiert');
     return allergens;
   }
 }
@@ -273,8 +273,6 @@ async function createOrUpdateDish(dish, category) {
     if (needsUpdate) {
       await existingDish.save();
       console.log(`Dish updated: ${existingDish.name}`);
-    } else {
-      console.log(`No updates needed for: ${existingDish.name}`);
     }
   }
   return existingDish;
