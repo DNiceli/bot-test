@@ -22,8 +22,7 @@ module.exports = {
         content: 'favs:\n' + content,
         ephemeral: true,
       });
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply(
         'Es gab einen Fehler beim Anzeigen der Statistiken.',

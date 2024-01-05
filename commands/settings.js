@@ -52,8 +52,7 @@ module.exports = {
           console.log(i.customId + i.values);
           selectedValues.set(i.customId, i.values);
           await i.deferUpdate();
-        }
- else if (i.isButton()) {
+        } else if (i.isButton()) {
           if (i.customId === 'submit') {
             const selectedAllergenValues = Array.from(
               selectedValues.values(),
@@ -73,23 +72,19 @@ module.exports = {
                 );
                 await user.save();
                 await i.update({ content: 'Settings saved', components: [] });
-              }
- catch (error) {
+              } catch (error) {
                 console.error('Error updating user:', error);
                 await i.update({
                   content: 'Error saving settings',
                   components: [],
                 });
               }
-            }
- else {
+            } else {
               await i.update({ content: 'No changes made', components: [] });
             }
-          }
- else if (i.customId === 'cancel') {
+          } else if (i.customId === 'cancel') {
             await i.update({ content: 'Process canceled', components: [] });
-          }
- else if (i.customId === 'reset') {
+          } else if (i.customId === 'reset') {
             user.allergens = [];
             await user.save();
             await i.update({ content: 'Allergens resetted', components: [] });
@@ -97,8 +92,7 @@ module.exports = {
           collector.stop();
         }
       });
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.reply(
         'Es gab einen Fehler beim Anzeigen der Einstellungen.',
@@ -183,8 +177,7 @@ async function findOrFetchAllergens() {
   let allergens;
   try {
     allergens = await Allergen.find();
-  }
- catch (error) {
+  } catch (error) {
     // Handle the error or fallback if Allergen.find() fails
     console.error('Error fetching allergens:', error);
     allergens = await fetchAndSaveAllergens();
@@ -205,8 +198,7 @@ async function findOrCreateUser(interaction) {
       });
       await user.save();
     }
-  }
- catch (error) {
+  } catch (error) {
     console.error('Error handling user data:', error);
   }
   return user;

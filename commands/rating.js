@@ -41,8 +41,7 @@ module.exports = {
       await interaction.editReply(
         `Du hast das Gericht ${dishExists.name} mit ${ratingValue} Sternen bewertet.`,
       );
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply(
         'Es gab einen Fehler beim Bewerten des Gerichts.',

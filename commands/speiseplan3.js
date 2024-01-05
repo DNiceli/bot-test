@@ -15,8 +15,7 @@ module.exports = {
       );
       const img = await generateMenuImage(weekMenu);
       await interaction.editReply({ files: [img] });
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply('Es gab einen Fehler bei der Ausführung.');
     }

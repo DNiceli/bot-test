@@ -17,8 +17,7 @@ module.exports = {
       if (!favorites) {
         await interaction.editReply('Du hast noch keine Gerichte favorisiert.');
         return;
-      }
- else {
+      } else {
         const favoriteDishes = await getFavoriteDishes(favorites);
 
         const favoriteDishesToStringSeparatedByComma =
@@ -34,8 +33,7 @@ module.exports = {
             favoriteDishesToStringSeparatedByComma,
         });
       }
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply(
         'Es gab einen Fehler beim Favorisieren des Gerichts.',

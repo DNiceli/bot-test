@@ -57,16 +57,14 @@ ratingSchema.statics.createOrUpdateRating = async function(
       });
       console.log(`Rating created User: ${userId} Dish: ${dishId}`);
       return true;
-    }
- catch (err) {
+    } catch (err) {
       console.error(
         `Could not create Rating User: ${userId}: Dish: ${dishId}`,
         err,
       );
       return false;
     }
-  }
- else {
+  } else {
     existingFav.score = score;
     existingFav.comment = comment;
     existingFav.save();

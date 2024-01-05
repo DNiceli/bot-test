@@ -27,8 +27,7 @@ async function notify(client) {
         client.users.send(user.userId, query + ' Favorite alarm!');
       }
     }
-  }
- catch (err) {
+  } catch (err) {
     console.log(err);
   }
 }

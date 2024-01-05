@@ -16,19 +16,16 @@ module.exports = {
           notification: false,
         });
         interaction.reply('Notifications created + enabled');
-      }
- else if (notification.notification === false) {
+      } else if (notification.notification === false) {
         notification.notification = true;
         await notification.save();
         interaction.reply('Notifications enabled');
-      }
- else {
+      } else {
         notification.notification = false;
         await notification.save();
         interaction.reply('Notifications disabled');
       }
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply(
         'Es gab einen Fehler beim Aktivieren der Benachrichtigungen.',

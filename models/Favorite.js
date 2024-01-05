@@ -44,16 +44,14 @@ async function createOrUpdateFavorite(userId, guildId, dishId) {
         `Fav created User: ${userId} Dish: ${dishId} Guild: ${guildId}`,
       );
       return true;
-    }
- catch (err) {
+    } catch (err) {
       console.error(
         `Could not create Fav User: ${userId}: Dish: ${dishId} Guild: ${guildId}`,
         err,
       );
       return false;
     }
-  }
- else {
+  } else {
     console.log('Fav already exists');
     return false;
   }
@@ -77,8 +75,7 @@ async function getMostFavoritedDishes() {
         $group: { _id: '$dishId', totalQuantity: { $count: {} } },
       },
     ]);
-  }
- catch (error) {
+  } catch (error) {
     console.error('Error fetching most favorited dishes:', error);
     return [];
   }

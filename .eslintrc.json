@@ -50,5 +50,13 @@
     "space-unary-ops": "error",
     "spaced-comment": "error",
     "yoda": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.js", "**/*.spec.jsx"],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
 }

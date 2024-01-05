@@ -59,11 +59,9 @@ module.exports = {
       }
       if (!woche && wochentag) {
         date = getDateForWeekday('1', wochentag);
-      }
- else if (woche && wochentag) {
+      } else if (woche && wochentag) {
         date = getDateForWeekday(woche, wochentag);
-      }
- else {
+      } else {
         date = new Date().toISOString().split('T')[0];
       }
       const userAllergens = await findOrCreateUserAllergens(interaction);
@@ -71,8 +69,7 @@ module.exports = {
       let dailyMenu;
       try {
         dailyMenu = await getTodaysMenu(date);
-      }
- catch (error) {
+      } catch (error) {
         console.error(error);
         await interaction.editReply('Es ist kein Menü für heute vorhanden.');
       }
@@ -110,8 +107,7 @@ module.exports = {
             files: [img],
           });
           await i.update('You selected ' + currentDish);
-        }
- else if (i.isButton()) {
+        } else if (i.isButton()) {
           switch (i.customId) {
             case 'submit':
               await i.deferUpdate();
@@ -138,8 +134,7 @@ module.exports = {
                 interaction.editReply({
                   content: 'Added to favorites: ' + currentDish,
                 });
-              }
- else {
+              } else {
                 interaction.editReply({
                   content: 'Already in favorites: ' + currentDish,
                 });
@@ -174,8 +169,7 @@ module.exports = {
           }
         }
       });
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply('Es gab einen Fehler bei der Ausführung.');
     }
@@ -193,8 +187,7 @@ function sizeOf(menuImgs) {
 async function handleSubmission(submission, dishId, currentDish) {
   if (!submission) {
     submission.update({ content: 'You did not provide a rating' });
-  }
- else if (submission.isModalSubmit()) {
+  } else if (submission.isModalSubmit()) {
     if (!submission.components[0].components[0].value) {
       await submission.update({
         content: 'Please enter a value between 1 and 5',
@@ -280,8 +273,7 @@ async function findOrCreateUserAllergens(interaction) {
       allergens: [],
     });
     await user.save();
-  }
- else {
+  } else {
     userAllergens = user.allergens;
   }
   return userAllergens;

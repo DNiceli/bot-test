@@ -32,8 +32,7 @@ async function createDishPictureDalle(dishName) {
     const picture = response.data;
 
     return picture.data[0].url;
-  }
- catch (error) {
+  } catch (error) {
     console.error('Error generating dish picture:', error);
     throw error;
   }
@@ -53,8 +52,7 @@ const uploadImage = async (imagePath) => {
     const result = await cloudinary.uploader.upload(imagePath, options);
     console.log(result);
     return result.url;
-  }
- catch (error) {
+  } catch (error) {
     console.error(error);
   }
 };
@@ -64,8 +62,7 @@ const uploadBuffer = (buffer) => {
     const stream = cloudinary.uploader.upload_stream((error, result) => {
       if (result) {
         resolve(result);
-      }
- else {
+      } else {
         reject(error);
       }
     });
@@ -103,8 +100,7 @@ async function createUploadAndSaveDishPicture(dishName) {
       const image = new Image({ url: imageUrl });
       await image.save();
       return image._id;
-    }
- catch (error) {
+    } catch (error) {
       console.error('Error creating dish picture:', error);
       attempts++;
       if (attempts < maxAttempts) {
@@ -112,8 +108,7 @@ async function createUploadAndSaveDishPicture(dishName) {
           `Retrying in 60 seconds... (Attempt ${attempts} of ${maxAttempts})`,
         );
         await sleep(60000);
-      }
- else {
+      } else {
         throw error;
       }
     }

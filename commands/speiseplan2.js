@@ -38,8 +38,7 @@ module.exports = {
       let dailyMenu;
       try {
         dailyMenu = await getTodaysMenu();
-      }
- catch (error) {
+      } catch (error) {
         console.error(error);
         await interaction.editReply('Es ist kein Menü für heute vorhanden.');
       }
@@ -104,8 +103,7 @@ module.exports = {
         const dish = menuImgs[currentCategory][currentIndex];
         if (!dish) {
           console.log('No dish found');
-        }
- else {
+        } else {
           const newImg = dish.image;
           await reply.edit({
             content: 'Here\'s the menu card:',
@@ -120,8 +118,7 @@ module.exports = {
         reply.reactions.removeAll();
         reply.delete();
       });
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply('Es gab einen Fehler bei der Ausführung.');
     }
@@ -157,8 +154,7 @@ async function findOrCreateUserAllergens(interaction) {
       allergens: [],
     });
     await user.save();
-  }
- else {
+  } else {
     userAllergens = user.allergens;
   }
   return userAllergens;
@@ -179,8 +175,7 @@ async function displayMenuImage(interaction, menuImgs, currentCategory) {
     });
 
     return reply;
-  }
- else {
+  } else {
     const reply = await interaction.editReply({
       content: 'Es gibt kein passendes Gericht zu deinem Filter.',
     });

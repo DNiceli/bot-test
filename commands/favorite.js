@@ -39,8 +39,7 @@ module.exports = {
       await interaction.editReply(
         `Gericht ${dishExists.name} wurde zu deinen Favoriten hinzugefügt.`,
       );
-    }
- catch (error) {
+    } catch (error) {
       console.error(error);
       await interaction.editReply(
         'Es gab einen Fehler beim Favorisieren des Gerichts.',
