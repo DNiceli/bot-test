@@ -9,128 +9,85 @@ const { uploadAndAddDishcardUrlToDish } = require('./speiseplan-util.js');
 
 async function fetchAndSaveDishes(date) {
   try {
-    const url = process.env.mensaUrl2;
     const menu = new Map();
     let allergens = await Allergen.find();
     if (!allergens) {
       allergens = await fetchAndSaveAllergens();
     }
-    if (process.env.OVERRIDE_DATE === 'true') {
-      date = '2023-12-20';
-    }
-    await axios
-      .post(
-        url,
-        new URLSearchParams({
-          resources_id: '527',
-          date: date,
-        }),
-        {
-          headers: {
-            'x-requested-with': 'XMLHttpRequest',
-          },
-        },
-      )
-      .then((response) => {
-        const html = response.data;
-        const $ = cheerio.load(html);
-        /* eslint no-shadow: ["error", { "allow": ["_"] }]*/
-        /* eslint-env es6*/
-        $('.container-fluid.splGroupWrapper').each((_, groupWrapper) => {
-          const group = $(groupWrapper).find('.splGroup').text().trim();
-          const dishes = [];
-
-          $(groupWrapper)
-            .find('.row.splMeal')
-            .each(async (_, meal) => {
-              let dietType = 'keine Angabe';
-              const dietInfo = $(meal)
-                .find('img.splIcon')
-                .map((i, elem) => {
-                  const altText = $(elem).attr('alt');
-                  console.log(altText);
-                  if (altText.includes('Vegan')) {
-                    return 'vegan';
-                  }
- else if (altText.includes('Vegetarisch')) {
-                    return 'vegetarisch';
-                  }
-                  return null;
-                })
-                .get();
-
-              if (dietInfo.includes('vegan')) {
+    const $ = await requestSiteAndLoadHTML(date, '527');
+    /* eslint no-shadow: ["error", { "allow": ["_"] }]*/
+    /* eslint-env es6*/
+    $('.container-fluid.splGroupWrapper').each((_, groupWrapper) => {
+      const group = $(groupWrapper).find('.splGroup').text().trim();
+      const dishes = [];
+      $(groupWrapper)
+        .find('.row.splMeal')
+        .each(async (_, meal) => {
+          let dietType = 'keine Angabe';
+          let ampelColor = 'Unbekannt';
+          let h2o = '';
+          let co2 = '';
+          $(meal)
+            .find('img.splIcon')
+            .each((_, icon) => {
+              const altText = $(icon).attr('alt');
+              if (altText.includes('Vegan')) {
                 dietType = 'vegan';
-              }
- else if (dietInfo.includes('vegetarisch')) {
+              } else if (altText.includes('Vegetarisch')) {
                 dietType = 'vegetarisch';
               }
-
-              const ampelText = $(meal).find('img.splIcon').attr('alt');
-
-              let ampelColor;
-              if (ampelText.includes('Grüner')) {
+              if (altText.includes('Grüner')) {
                 ampelColor = 'Grün';
-              }
- else if (ampelText.includes('Roter')) {
+              } else if (altText.includes('Roter')) {
                 ampelColor = 'Rot';
-              }
- else if (ampelText.includes('Gelber')) {
+              } else if (altText.includes('Gelber')) {
                 ampelColor = 'Gelb';
               }
- else {
-                ampelColor = 'Unbekannt';
-              }
-              const dish = {
-                name: $(meal).find('.col-xs-6.col-md-5 > .bold').text().trim(),
-                price: $(meal)
-                  .find('.col-xs-12.col-md-3.text-right')
-                  .text()
-                  .trim(),
-                allergens: $(meal)
-                  .find('div.kennz.ptr.toolt table tr')
-                  .map((i, elem) => $(elem).find('td').eq(1).text().trim())
-                  .get()
-                  .map((allergenDesc) =>
-                    allergenLookup(allergenDesc, allergens),
-                  )
-                  .filter((allergen) => allergen !== null),
-                ampel: ampelColor,
-                h2o: $(meal)
-                  .find('img[aria-describedby^=\'tooltip_H2O\']')
+              if ($(icon).attr('aria-describedby').startsWith('tooltip_H2O')) {
+                h2o = $(icon)
                   .parent()
                   .find('.shocl_content')
                   .last()
                   .text()
                   .trim()
-                  .split('Wasserverbrauch')[0],
-                co2: $(meal)
-                  .find('img[aria-describedby^=\'tooltip_CO2\']')
+                  .split('Wasserverbrauch')[0];
+              }
+              if ($(icon).attr('aria-describedby').startsWith('tooltip_CO2')) {
+                co2 = $(icon)
                   .parent()
                   .find('.shocl_content')
                   .first()
                   .text()
                   .trim()
-                  .split('CO2')[0],
-                dietType: dietType,
-              };
-              if (!dish.allergens) {
-                dish.allergens = [];
+                  .split('CO2')[0];
               }
-              dishes.push(dish);
             });
 
-          menu.set(group, dishes);
+          const dish = {
+            name: $(meal).find('.col-xs-6.col-md-5 > .bold').text().trim(),
+            price: $(meal).find('.col-xs-12.col-md-3.text-right').text().trim(),
+            allergens: $(meal)
+              .find('div.kennz.ptr.toolt table tr')
+              .map((i, elem) => $(elem).find('td').eq(1).text().trim())
+              .get()
+              .map((allergenDesc) => allergenLookup(allergenDesc, allergens))
+              .filter((allergen) => allergen !== null),
+            ampel: ampelColor,
+            h2o: h2o,
+            co2: co2,
+            dietType: dietType,
+          };
+          if (!dish.allergens) {
+            dish.allergens = [];
+          }
+          dishes.push(dish);
         });
-      })
 
-      .catch((error) => {
-        console.log(error);
-      });
+      menu.set(group, dishes);
+    });
     createAndSaveDishMenu(menu);
     return menu;
-  }
- catch (error) {
+  } catch (error) {
     console.error(error);
   }
 }
@@ -143,27 +100,8 @@ const allergenLookup = (description, allergens) => {
 
 async function fetchAndSaveAllergens(date) {
   try {
-    const url = process.env.mensaUrl2;
     const allergens = [];
-    if (process.env.OVERRIDE_DATE === 'true') {
-      date = '2023-12-20';
-    }
-
-    const response = await axios.post(
-      url,
-      new URLSearchParams({
-        resources_id: '527',
-        date: date,
-      }),
-      {
-        headers: {
-          'x-requested-with': 'XMLHttpRequest',
-        },
-      },
-    );
-
-    const html = response.data;
-    const $ = cheerio.load(html);
+    const $ = await requestSiteAndLoadHTML(date, '527');
 
     $('input.itemkennz').each((_, element) => {
       const id = $(element).attr('id').replace('stoff-', '');
@@ -191,8 +129,7 @@ async function fetchAndSaveAllergens(date) {
           existingAllergen.description = allergenData.beschreibung;
           await existingAllergen.save();
         }
-      }
- else {
+      } else {
         const newAllergen = new Allergen({
           number: allergenData.nr,
           description: allergenData.beschreibung,
@@ -201,11 +138,32 @@ async function fetchAndSaveAllergens(date) {
       }
     }
     return allergens;
-  }
- catch (error) {
+  } catch (error) {
     console.error('Fehler beim Abrufen der Allergene:', error);
     throw error;
   }
+}
+
+async function requestSiteAndLoadHTML(date, resources_id) {
+  const url = process.env.mensaUrl2;
+  if (process.env.OVERRIDE_DATE === 'true') {
+    date = '2023-12-20';
+  }
+  const response = await axios.post(
+    url,
+    new URLSearchParams({
+      resources_id: resources_id,
+      date: date,
+    }),
+    {
+      headers: {
+        'x-requested-with': 'XMLHttpRequest',
+      },
+    },
+  );
+  const html = response.data;
+  const $ = cheerio.load(html);
+  return $;
 }
 
 async function createAndSaveDishMenu(menu) {
@@ -217,8 +175,7 @@ async function createAndSaveDishMenu(menu) {
       date: today,
       dishes: [],
     });
-  }
- else {
+  } else {
     dailyMenu.dishes = dailyMenu.dishes.map((dishId) => dishId.toString());
   }
 
@@ -256,8 +213,7 @@ async function createOrUpdateDish(dish, category) {
     await uploadAndAddDishcardUrlToDish(existingDish);
     existingDish.save();
     console.log(`Dish created: ${existingDish.name}`);
-  }
- else {
+  } else {
     let needsUpdate = false;
 
     if (existingDish.price !== dish.price) {
@@ -299,8 +255,7 @@ async function createOrUpdateDish(dish, category) {
     if (needsUpdate) {
       await existingDish.save();
       console.log(`Dish updated: ${existingDish.name}`);
-    }
- else {
+    } else {
       console.log(`No updates needed for: ${existingDish.name}`);
     }
   }
@@ -314,8 +269,7 @@ async function getTodaysMenu(date) {
     }
     const dailyMenu = await Menu.findOne({ date: date }).populate('dishes');
     return dailyMenu.dishes;
-  }
- catch (error) {
+  } catch (error) {
     console.error('Error fetching today\'s menu:', error);
     return [];
   }
