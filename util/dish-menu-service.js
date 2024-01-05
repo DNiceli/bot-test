@@ -23,55 +23,25 @@ async function fetchAndSaveDishes(date) {
       $(groupWrapper)
         .find('.row.splMeal')
         .each(async (_, meal) => {
-          let dietType = 'keine Angabe';
-          let ampelColor = 'Unbekannt';
-          let h2o = '';
-          let co2 = '';
-          $(meal)
-            .find('img.splIcon')
-            .each((_, icon) => {
-              const altText = $(icon).attr('alt');
-              if (altText.includes('Vegan')) {
-                dietType = 'vegan';
-              } else if (altText.includes('Vegetarisch')) {
-                dietType = 'vegetarisch';
-              }
-              if (altText.includes('Grüner')) {
-                ampelColor = 'Grün';
-              } else if (altText.includes('Roter')) {
-                ampelColor = 'Rot';
-              } else if (altText.includes('Gelber')) {
-                ampelColor = 'Gelb';
-              }
-              if ($(icon).attr('aria-describedby').startsWith('tooltip_H2O')) {
-                h2o = $(icon)
-                  .parent()
-                  .find('.shocl_content')
-                  .last()
-                  .text()
-                  .trim()
-                  .split('Wasserverbrauch')[0];
-              }
-              if ($(icon).attr('aria-describedby').startsWith('tooltip_CO2')) {
-                co2 = $(icon)
-                  .parent()
-                  .find('.shocl_content')
-                  .first()
-                  .text()
-                  .trim()
-                  .split('CO2')[0];
-              }
-            });
-
+          const [dietType, ampelColor, h2o, co2] = extractIconInfo($, meal);
+          const dishname = $(meal)
+            .find('.col-xs-6.col-md-5 > .bold')
+            .text()
+            .trim();
+          const price = $(meal)
+            .find('.col-xs-12.col-md-3.text-right')
+            .text()
+            .trim();
+          const allergensDish = $(meal)
+            .find('div.kennz.ptr.toolt table tr')
+            .map((i, elem) => $(elem).find('td').eq(1).text().trim())
+            .get()
+            .map((allergenDesc) => allergenLookup(allergenDesc, allergens))
+            .filter((allergen) => allergen !== null);
           const dish = {
-            name: $(meal).find('.col-xs-6.col-md-5 > .bold').text().trim(),
-            price: $(meal).find('.col-xs-12.col-md-3.text-right').text().trim(),
-            allergens: $(meal)
-              .find('div.kennz.ptr.toolt table tr')
-              .map((i, elem) => $(elem).find('td').eq(1).text().trim())
-              .get()
-              .map((allergenDesc) => allergenLookup(allergenDesc, allergens))
-              .filter((allergen) => allergen !== null),
+            name: dishname,
+            price: price,
+            allergens: allergensDish,
             ampel: ampelColor,
             h2o: h2o,
             co2: co2,
@@ -97,6 +67,49 @@ const allergenLookup = (description, allergens) => {
     allergens.find((allergen) => allergen.description === description) || null;
   return { number: find.number, description: find.description };
 };
+
+function extractIconInfo($, meal) {
+  let dietType = 'keine Angabe';
+  let ampelColor = 'Unbekannt';
+  let h2o = '';
+  let co2 = '';
+  $(meal)
+    .find('img.splIcon')
+    .each((_, icon) => {
+      const altText = $(icon).attr('alt');
+      if (altText.includes('Vegan')) {
+        dietType = 'vegan';
+      } else if (altText.includes('Vegetarisch')) {
+        dietType = 'vegetarisch';
+      }
+      if (altText.includes('Grüner')) {
+        ampelColor = 'Grün';
+      } else if (altText.includes('Roter')) {
+        ampelColor = 'Rot';
+      } else if (altText.includes('Gelber')) {
+        ampelColor = 'Gelb';
+      }
+      if ($(icon).attr('aria-describedby').startsWith('tooltip_H2O')) {
+        h2o = $(icon)
+          .parent()
+          .find('.shocl_content')
+          .last()
+          .text()
+          .trim()
+          .split('Wasserverbrauch')[0];
+      }
+      if ($(icon).attr('aria-describedby').startsWith('tooltip_CO2')) {
+        co2 = $(icon)
+          .parent()
+          .find('.shocl_content')
+          .first()
+          .text()
+          .trim()
+          .split('CO2')[0];
+      }
+    });
+  return { dietType, ampelColor, h2o, co2 };
+}
 
 async function fetchAndSaveAllergens(date) {
   try {
