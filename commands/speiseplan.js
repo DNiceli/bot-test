@@ -112,14 +112,14 @@ module.exports = {
           await i.update('You selected ' + currentDish);
         } else if (i.isButton()) {
           switch (i.customId) {
-            case 'submit':
-              await i.deferUpdate();
-              console.log('sub');
+            case 'close':
+              await interaction.deleteReply();
+              collector.stop();
               break;
             case 'favorite': {
               if (!i.guild) return;
               if (!currentDish) {
-                await i.deferUpdate();
+                await i.update('You didn\'t choose a dish yet.');
                 // TODO: Tell User to choose Dish first
                 return;
               }
@@ -356,8 +356,8 @@ function createDishSelectMenu(menuImgs) {
 
   const buttonRow = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId('submit')
-      .setLabel('Submit')
+      .setCustomId('close')
+      .setLabel('Close')
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId('favorite')
