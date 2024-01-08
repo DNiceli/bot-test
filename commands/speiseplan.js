@@ -9,6 +9,7 @@ const {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
+  EmbedBuilder,
 } = require('discord.js');
 const Favorite = require('../models/Favorite.js');
 const { getTodaysMenu } = require('../util/dish-menu-service.js');
@@ -78,11 +79,14 @@ module.exports = {
       sizeOf(menuImgs);
       const components = createDishSelectMenu(menuImgs);
 
+      const dishEmbed = createDishListEmbed(menuImgs);
+
       const response = await interaction.editReply({
         content: 'Adjust the settings here:',
         components: components,
         fetchReply: true,
         ephemeral: true,
+        embeds: [dishEmbed],
       });
 
       const collector = response.createMessageComponentCollector({
@@ -195,7 +199,8 @@ module.exports = {
               console.log(button.toJSON());
               const newComponents = createDishSelectMenu(filteredMenuImgs);
               newComponents[1].components[3] = button;
-              await i.update({ components: newComponents });
+              const newEmbed = createDishListEmbed(filteredMenuImgs);
+              await i.update({ components: newComponents, embeds: [newEmbed] });
               break;
             }
           }
@@ -207,6 +212,27 @@ module.exports = {
     }
   },
 };
+
+function createDishListEmbed(menuImgs) {
+  const categoryMap = new Map();
+  menuImgs.forEach((dish) => {
+    if (!categoryMap.has(dish.category)) {
+      categoryMap.set(dish.category, []);
+    }
+    categoryMap.get(dish.category).push(dish.name);
+  });
+  const embed = new EmbedBuilder().setColor(0x0099ff).setTitle('Speisekarte');
+  // .setThumbnail('') Botbild adden
+
+  categoryMap.forEach((dishes, category) => {
+    if (category === 'Beilagen') {
+      embed.addFields({ name: category, value: dishes.join(', ') });
+    } else {
+      embed.addFields({ name: category, value: dishes.join('\n') });
+    }
+  });
+  return embed;
+}
 
 function sizeOf(menuImgs) {
   const size = Buffer.byteLength(JSON.stringify(menuImgs));
@@ -313,6 +339,7 @@ async function findOrCreateUserAllergens(interaction) {
 
 function createDishSelectMenu(menuImgs) {
   const components = [];
+  menuImgs = menuImgs.sort((a, b) => a.category.localeCompare(b.category));
   const selectMenu = new StringSelectMenuBuilder()
     .setCustomId('dishes')
     .setPlaceholder('Choose a dish');
