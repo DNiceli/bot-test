@@ -160,9 +160,42 @@ module.exports = {
               await handleSubmission(submission, dishId, currentDish);
               break;
             }
-            case 'close': {
-              console.log('close');
-              await i.deferUpdate();
+            case 'diet': {
+              let filteredMenuImgs = menuImgs;
+              console.log(filteredMenuImgs);
+              const rows = i.message.components;
+              let button = rows[1].components.find(
+                (c) => c.customId === 'diet',
+              );
+              console.log(button.toJSON());
+              if (button.label === 'Diet Typ') {
+                console.log('shouldwork');
+                button = new ButtonBuilder()
+                  .setCustomId('diet')
+                  .setLabel('Vegetarisch')
+                  .setStyle(ButtonStyle.Primary);
+                filteredMenuImgs = filteredMenuImgs.filter(
+                  (dish) =>
+                    dish.dietType === 'vegetarisch' || dish.dietType === 'vegan',
+                );
+              } else if (button.label === 'Vegetarisch') {
+                button = new ButtonBuilder()
+                  .setCustomId('diet')
+                  .setLabel('Vegan')
+                  .setStyle(ButtonStyle.Primary);
+                filteredMenuImgs = filteredMenuImgs.filter(
+                  (dish) => dish.dietType === 'vegan',
+                );
+              } else {
+                button = new ButtonBuilder()
+                  .setCustomId('diet')
+                  .setLabel('Diet Typ')
+                  .setStyle(ButtonStyle.Secondary);
+              }
+              console.log(button.toJSON());
+              const newComponents = createDishSelectMenu(filteredMenuImgs);
+              newComponents[1].components[3] = button;
+              await i.update({ components: newComponents });
               break;
             }
           }
@@ -308,8 +341,8 @@ function createDishSelectMenu(menuImgs) {
       .setLabel('Rate')
       .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
-      .setCustomId('close')
-      .setLabel('Close')
+      .setCustomId('diet')
+      .setLabel('Diet Typ')
       .setStyle(ButtonStyle.Secondary),
   );
   components.push(buttonRow);
