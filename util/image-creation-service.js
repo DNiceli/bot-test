@@ -13,7 +13,7 @@ cloudinary.config({
 
 async function createDishPictureDalle(dishName) {
   try {
-    const prompt = `Generiere ein Bild von dem Gericht: ${dishName}, behalte im Hinterkopf, dass es in einer Hochschulmensa angeboten wird.`;
+    const prompt = `Generiere ein, für eine Speisekarte geeignetes Bild von dem Gericht: ${dishName} .`;
     const response = await axios.post(
       'https://api.openai.com/v1/images/generations',
       {

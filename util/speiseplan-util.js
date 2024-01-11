@@ -76,17 +76,18 @@ async function generateMenuImage(weekMenus) {
 }
 
 async function generateMenuCard(dish) {
-  const categoryColors = {
-    Vorspeisen: '#FFDAB9',
-    Essen: '#ADD8E6',
-    Salate: '#FFFACD',
-    Suppen: '#FFFACD',
-    Beilagen: '#FFFACD',
-    Desserts: '#FFFACD',
-    Aktionen: '#E6E6FA',
-  };
-
-  const color = categoryColors[dish.category] || '#FFFFFF';
+  // const categoryColors = {
+  //   Vorspeisen: '#FFDAB9',
+  //   Essen: '#ADD8E6',
+  //   Salate: '#FFFACD',
+  //   Suppen: '#FFFACD',
+  //   Beilagen: '#FFFACD',
+  //   Desserts: '#FFFACD',
+  //   Aktionen: '#E6E6FA',
+  // };
+  //
+  // const color = categoryColors[dish.category] || '#FFFFFF';
+  const color = '#FFFFFF';
 
   const dishImage = await dish.populate('imageId');
 
@@ -144,6 +145,35 @@ async function generateMenuCard(dish) {
             top: 180px;
             left: 20px;
           }
+          .diet-type {
+            font-size: 12px;
+            color: #555;
+            position: absolute;
+            top: 50px;
+            left: 120px;
+          }
+          .eco-info {
+            font-size: 10px;
+            color: #555;
+            position: absolute;
+            bottom: 10px;
+            right: 40px;
+          }
+          .traffic-light {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-top: 40px solid ${
+              dish.ampel === 'Rot'
+                ? '#ff0000'
+                : dish.ampel === 'Gelb'
+                ? '#ffff00'
+                : '#00ff00'
+            };
+            border-left: 40px solid transparent;
+          }
         </style>
       </head>
       <body>
@@ -152,6 +182,8 @@ async function generateMenuCard(dish) {
         <div class="name">${dish.name}</div>
         <div class="price">Preis: ${dish.price}</div>
         <div class="allergens">Allergene: ${allergens}</div>
+        <div class="eco-info">CO2: ${dish.co2}, H2O: ${dish.h2o}</div>
+        <div class="traffic-light"></div>
       </body>
     </html>`;
 

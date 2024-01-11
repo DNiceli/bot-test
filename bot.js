@@ -16,7 +16,10 @@ const client = new Client({
 
 client.once('ready', () => {
   console.log('Bot is online!');
-  fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
+  const date = new Date();
+  const tomorrow = new Date(date);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  // fetchAndSaveDishes(tomorrow.toISOString().split('T')[0]);
   fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
 });
 

@@ -28,7 +28,7 @@ async function fetchAndSaveDishes(date) {
         });
       menu.set(group, dishes);
     });
-    createAndSaveDishMenu(menu);
+    createAndSaveDishMenu(menu, date);
     return menu;
   } catch (error) {
     console.error(error);
@@ -184,13 +184,13 @@ async function requestSiteAndLoadHTML(date, resources_id) {
   return $;
 }
 
-async function createAndSaveDishMenu(menu) {
-  const today = new Date().toISOString().split('T')[0];
-  let dailyMenu = await Menu.findOne({ date: today });
+async function createAndSaveDishMenu(menu, date) {
+  // const today = new Date().toISOString().split('T')[0];
+  let dailyMenu = await Menu.findOne({ date: date });
 
   if (!dailyMenu) {
     dailyMenu = new Menu({
-      date: today,
+      date: date,
       dishes: [],
     });
   } else {
@@ -209,7 +209,7 @@ async function createAndSaveDishMenu(menu) {
   }
 
   await dailyMenu.save();
-  console.log(`Menu for ${today} updated`);
+  console.log(`Menu for ${date} updated`);
 }
 
 async function createOrUpdateDish(dish, category) {
@@ -265,7 +265,7 @@ async function createOrUpdateDish(dish, category) {
       needsUpdate = true;
       console.log('Updategrund: diet' + dish.dietType);
     }
-    if (!existingDish.dishCard) {
+    if (existingDish.dishCard) {
       needsUpdate = true;
       await uploadAndAddDishcardUrlToDish(existingDish);
       console.log('Updategrund: dishcard ' + existingDish.dishCard);

@@ -50,7 +50,10 @@ module.exports = {
     try {
       await interaction.deferReply({ ephemeral: true });
       const woche = interaction.options.getString('woche');
-      const wochentag = interaction.options.getString('wochentag');
+      const wochentag = parseInt(
+        interaction.options.getString('wochentag'),
+        10,
+      );
       let date = new Date().toISOString().split('T')[0];
       if (woche && !wochentag) {
         return await interaction.editReply(
@@ -379,6 +382,7 @@ function createDishSelectMenu(menuImgs) {
 function getDateForWeekday(weekChoice, weekdayChoice) {
   const today = new Date();
   const currentWeekday = today.getDay();
+  console.log(today.toISOString().split('T')[0]);
 
   const date = new Date(today);
   date.setDate(today.getDate() - currentWeekday + weekdayChoice);
@@ -394,7 +398,7 @@ function getDateForWeekday(weekChoice, weekdayChoice) {
       break;
   }
 
-  console.log(date);
+  console.log(date.toISOString().split('T')[0]);
 
   return date.toISOString().split('T')[0];
 }

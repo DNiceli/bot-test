@@ -49,7 +49,6 @@ module.exports = {
 
       collector.on('collect', async (i) => {
         if (i.isStringSelectMenu()) {
-          console.log(i.customId + i.values);
           selectedValues.set(i.customId, i.values);
           await i.deferUpdate();
         } else if (i.isButton()) {
