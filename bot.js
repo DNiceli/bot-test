@@ -5,6 +5,7 @@ require('./dbInit.js');
 // prettier-ignore
 const { fetchAndSaveDishes, fetchAndSaveAllergens } = require('./util/dish-menu-service.js');
 const { notify } = require('./util/notification-service.js');
+const { createDishPictureDalle } = require('./util/image-creation-service.js');
 const cron = require('node-cron');
 // prettier-ignore
 const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
@@ -16,10 +17,7 @@ const client = new Client({
 
 client.once('ready', () => {
   console.log('Bot is online!');
-  const date = new Date();
-  const tomorrow = new Date(date);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  // fetchAndSaveDishes(tomorrow.toISOString().split('T')[0]);
+  fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
   fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
 });
 
@@ -80,6 +78,27 @@ client.on(Events.MessageCreate, async (message) => {
     const count = await getGuildCount();
     console.log(count);
     message.reply('Anzahl an Servern: ' + count);
+  }
+
+  if (message.content.startsWith('days ')) {
+    // Extrahieren der Tage aus der Nachricht
+    const days = parseInt(message.content.split(' ')[1]);
+    if (!isNaN(days)) {
+      const date = new Date();
+      for (let i = 1; i < days; i++) {
+        const nextDay = new Date(date);
+        nextDay.setDate(date.getDate() - i);
+        if (nextDay.getDay() === 0 || nextDay.getDay() === 6) continue;
+        await fetchAndSaveDishes(nextDay.toISOString().split('T')[0]);
+      }
+    } else {
+      message.channel.send('Bitte geben Sie eine gültige Zahl an.');
+    }
+  }
+
+  if (message.content.startsWith('genImg ')) {
+    const dishName = message.content.split(' ')[1];
+    await createDishPictureDalle(dishName);
   }
 });
 

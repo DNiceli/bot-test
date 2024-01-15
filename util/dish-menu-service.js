@@ -265,7 +265,7 @@ async function createOrUpdateDish(dish, category) {
       needsUpdate = true;
       console.log('Updategrund: diet' + dish.dietType);
     }
-    if (existingDish.dishCard) {
+    if (!existingDish.dishCard) {
       needsUpdate = true;
       await uploadAndAddDishcardUrlToDish(existingDish);
       console.log('Updategrund: dishcard ' + existingDish.dishCard);

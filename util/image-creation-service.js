@@ -13,7 +13,11 @@ cloudinary.config({
 
 async function createDishPictureDalle(dishName) {
   try {
-    const prompt = `Generiere ein, für eine Speisekarte geeignetes Bild von dem Gericht: ${dishName} .`;
+    let prompt = `Generiere ein, für eine Speisekarte geeignetes Bild von dem Gericht: ${dishName} . Das Gericht sollte auf einem Teller oder einer Schüssel serviert sein. Geh davon aus, dass das Gericht zubereitet ist, falls nicht anders beschrieben, oder das Gericht etwas wie Gemüse ist. `;
+    if (dishName === 'Süß-Sauer-Scharf Suppe') {
+      prompt =
+        'Generiere ein, für eine Speisekarte geeignetes Bild von dem Gericht: Sweet Sour Spicy Soup .';
+    }
     const response = await axios.post(
       'https://api.openai.com/v1/images/generations',
       {
@@ -33,7 +37,16 @@ async function createDishPictureDalle(dishName) {
 
     return picture.data[0].url;
   } catch (error) {
-    console.error('Error generating dish picture:', error);
+    if (error.response) {
+      if (error.response.data.error.code === 'content_policy_violation') {
+        console.log('TODO: Handle content policy violation');
+      }
+      console.error('Response body:', error.response.data);
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+    } else {
+      console.error('Error setting up the request:', error.message);
+    }
     throw error;
   }
 }
@@ -91,7 +104,7 @@ function sleep(ms) {
 
 async function createUploadAndSaveDishPicture(dishName) {
   let attempts = 0;
-  const maxAttempts = 2;
+  const maxAttempts = 6;
 
   while (attempts < maxAttempts) {
     try {
@@ -109,6 +122,7 @@ async function createUploadAndSaveDishPicture(dishName) {
         );
         await sleep(60000);
       } else {
+        console.log(`Max attempts reached, giving up on ${dishName}.`);
         throw error;
       }
     }
@@ -119,4 +133,5 @@ module.exports = {
   createUploadAndSaveDishPicture,
   uploadBuffer,
   uploadImageBuffer,
+  createDishPictureDalle,
 };
