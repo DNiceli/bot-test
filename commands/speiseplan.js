@@ -110,7 +110,7 @@ module.exports = {
           let content = 'Du hast gewählt ' + currentDish;
           console.log(dishObj.rating);
           console.log(dishObj.favorites);
-          if (dishObj.rating) {
+          if (parseFloat(dishObj.rating)) {
             content = content + ' avg Rating: ' + dishObj.rating;
           }
           if (dishObj.favorite) {

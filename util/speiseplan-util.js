@@ -97,6 +97,10 @@ async function generateMenuCard(dish) {
   if (dish.co2 && dish.h2o) {
     ecoInfoString = `CO2: ${dish.co2}, H2O: ${dish.h2o}`;
   }
+  const rating = parseFloat(dish.rating.toString()) || 0;
+  const favorites = dish.favorites || 0;
+  console.log(rating);
+  console.log(favorites);
   const htmlTemplate = `
   <!DOCTYPE html>
   <html>
@@ -105,7 +109,7 @@ async function generateMenuCard(dish) {
         /* Basis-Styling */
         body {
           width: 500px;
-          height: 256px;
+          height: 200px;
           font-family: Arial, sans-serif;
           background-color: ${color};
           margin: 0;
@@ -113,15 +117,16 @@ async function generateMenuCard(dish) {
           position: relative;
         }
         .image-placeholder {
-          width: 200px;
-          height: 200px;
+          width: 180px;
+          height: 180px;
           background-color: #CCCCCC;
           position: absolute;
-          top: 0px;
-          left: 0px;
+          top: 10px;
+          left: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
+          border-radius: 10px;
         }
         .name, .price, .allergens, .eco-info {
           color: #333333;
@@ -130,33 +135,55 @@ async function generateMenuCard(dish) {
         .name {
           font-size: 15px;
           font-weight: bold;
-          left: 240px;
+          max-width: 260px;
+          max-height: 40px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          left: 220px;
           top: 40px;
         }
         .price {
+          color: #6495ed;
+          font-weight: bold;
           font-size: 14px;
-          left: 240px;
+          left: 220px;
           top: 80px;
         }
         .allergens {
+          max-width: 150px;
+          color: #6a6a6a;
           font-size: 10px;
-          left: 240px;
+          left: 220px;
           bottom: 50px;
         }
         .eco-info {
           font-size: 10px;
-          left: 240px;
-          bottom: 20px;
+          color: #6a6a6a;
+          left: 220px;
+          bottom: 30px;
         }
         .diet-info {
           position: absolute;
-          top: 80px;
-          left: 220px;
+          bottom: 30px;
+          right: 30px;
+        }
+        .rating {
+          font-size: 10px;
+          position: absolute;
+          bottom: 80px;
+          right: 30px;
+        }
+        .favorites {
+          font-size: 10px;
+          position: absolute;
+          bottom: 60px;
+          right: 30px;
         }
         .traffic-light {
           position: absolute;
-          top: 0;
-          right: 0;
+          top: 10px;
+          right: 10px;
           width: 0;
           height: 0;
           border-top: 40px solid ${
@@ -168,52 +195,35 @@ async function generateMenuCard(dish) {
           };
           border-left: 40px solid transparent;
         }
-        /* Icons für Diät-Informationen */
         .icon-vegan, .icon-vegetarisch {
           width: 24px;
           height: 24px;
           background-size: cover;
         }
         .icon-vegan {
-          background-image: url('phttps://www.stw.berlin/vendor/infomax/mensen/icons/15.png'); /* Pfad zum Vegan-Icon */
+          background-image: url('https://www.stw.berlin/vendor/infomax/mensen/icons/15.png');
         }
         .icon-vegetarisch {
-          background-image: url('https://www.stw.berlin/vendor/infomax/mensen/icons/1.png'); /* Pfad zum Vegetarisch-Icon */
+          background-image: url('https://www.stw.berlin/vendor/infomax/mensen/icons/1.png');
         }
       </style>
     </head>
     <body>
       <div class="image-placeholder">
-      <img src="${url}" alt="Dish Image" style="width:100%; height:100%;"></div>
+      <img src="${url}" alt="Dish Image" style="width:100%; height:100%; border-radius: 10px;"></div>
       <div class="name">${dish.name}</div>
-      <div class="price">Preis: ${dish.price}</div>
+      <div class="price">${dish.price}</div>
       <div class="allergens">Allergene: ${allergens}</div>
       <div class="eco-info">${ecoInfoString}</div>
       <div class="diet-info">
-      ${dietType === 'vegan' ? '<div class="icon-vegan"></div>' : ''}
+      ${dietType === 'Vegan' ? '<div class="icon-vegan"></div>' : ''}
       ${
-        dietType === 'vegetarisch' ? '<div class="icon-vegetarisch"></div>' : ''
+        dietType === 'Vegetarisch' ? '<div class="icon-vegetarisch"></div>' : ''
       }
       </div>
       <div class="traffic-light"></div>
-      <script>
-      document.addEventListener('DOMContentLoaded', (event) => {
-        const nameElement = document.querySelector('.name');
-        const priceElement = document.querySelector('.price');
-        const allergensE = document.querySelector('.allergens');
-        const ecoE = document.querySelector('.eco-info');
-      
-        if (nameElement && priceElement) {
-          const nameHeight = nameElement.offsetHeight;
-          const newTopForPrice = 50 + nameHeight; 
-          const newTopForAllergens = 70 + nameHeight; 
-          const newTopForEco = 90 + nameHeight; 
-          priceElement.style.top = newTopForPrice + 'px';
-          allergensE.style.top = newTopForAllergens + 'px';
-          ecoE.style.top = newTopForEco + 'px';
-        }
-      });
-      </script>
+      <div class="rating">${rating > 0 ? 'Ø: ' + rating + ' / 5' : ''}</div>
+      <div class="favorites">${favorites > 0 ? '♡: ' + favorites : ''}</div>
     
         </body>
       </html>
