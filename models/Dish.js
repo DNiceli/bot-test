@@ -55,6 +55,14 @@ const dishSchema = new Schema(
       type: String,
       required: false,
     },
+    rating: {
+      type: mongoose.Types.Decimal128,
+      required: false,
+    },
+    favorites: {
+      type: Number,
+      required: false,
+    },
   },
   {
     timestamps: true,

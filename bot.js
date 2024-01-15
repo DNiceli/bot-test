@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 require('./dbInit.js');
 // prettier-ignore
-const { fetchAndSaveDishes, fetchAndSaveAllergens } = require('./util/dish-menu-service.js');
+const { fetchAndSaveDishes, fetchAndSaveAllergens, updateFavoritesAndRatingsAllDishes } = require('./util/dish-menu-service.js');
 const { notify } = require('./util/notification-service.js');
 const { createDishPictureDalle } = require('./util/image-creation-service.js');
 const cron = require('node-cron');
@@ -94,6 +94,10 @@ client.on(Events.MessageCreate, async (message) => {
     } else {
       message.channel.send('Bitte geben Sie eine gültige Zahl an.');
     }
+  }
+
+  if (message.content === 'updateRF') {
+    await updateFavoritesAndRatingsAllDishes();
   }
 
   if (message.content.startsWith('genImg ')) {

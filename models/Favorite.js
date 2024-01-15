@@ -24,9 +24,11 @@ const favoriteSchema = new Schema(
   },
 );
 
-const Favorite = mongoose.model('Favorite', favoriteSchema);
-
-async function createOrUpdateFavorite(userId, guildId, dishId) {
+favoriteSchema.statics.createOrUpdateFavorite = async function(
+  userId,
+  guildId,
+  dishId,
+) {
   const existingFav = await Favorite.findOne({
     userId: userId,
     guildId: guildId,
@@ -55,9 +57,9 @@ async function createOrUpdateFavorite(userId, guildId, dishId) {
     console.log('Fav already exists');
     return false;
   }
-}
+};
 
-async function getFavorites(userId) {
+favoriteSchema.statics.getFavorites = async function(userId) {
   const favorites = await Favorite.find({
     userId: userId,
   });
@@ -66,9 +68,21 @@ async function getFavorites(userId) {
     return;
   }
   return favorites;
-}
+};
 
-async function getMostFavoritedDishes() {
+favoriteSchema.statics.getFavoritesCount = async function(dishId) {
+  const favorites = await Favorite.find({
+    dishId: dishId,
+  });
+  if (!favorites) {
+    console.log('No favorites found');
+    return 0;
+  }
+
+  return favorites.length;
+};
+
+favoriteSchema.statics.getMostFavoritedDishes = async function() {
   try {
     return await Favorite.aggregate([
       {
@@ -79,11 +93,7 @@ async function getMostFavoritedDishes() {
     console.error('Error fetching most favorited dishes:', error);
     return [];
   }
-}
-
-module.exports = {
-  Favorite,
-  createOrUpdateFavorite,
-  getFavorites,
-  getMostFavoritedDishes,
 };
+
+const Favorite = mongoose.model('Favorite', favoriteSchema);
+module.exports = Favorite;

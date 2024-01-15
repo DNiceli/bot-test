@@ -105,14 +105,21 @@ module.exports = {
       collector.on('collect', async (i) => {
         if (i.isStringSelectMenu()) {
           currentDish = i.values[0];
-          const img = menuImgs.find(
-            (dish) => dish.name === currentDish,
-          ).dishCard;
-          await interaction.editReply({
-            content: 'You selected ' + currentDish,
+          const dishObj = menuImgs.find((dish) => dish.name === currentDish);
+          const img = dishObj.dishCard;
+          let content = 'Du hast gewählt ' + currentDish;
+          console.log(dishObj.rating);
+          console.log(dishObj.favorites);
+          if (dishObj.rating) {
+            content = content + ' avg Rating: ' + dishObj.rating;
+          }
+          if (dishObj.favorite) {
+            content = content + ' Favs: ' + dishObj.favorite;
+          }
+          await i.update({
+            content: content,
             files: [img],
           });
-          await i.update('You selected ' + currentDish);
         } else if (i.isButton()) {
           switch (i.customId) {
             case 'close':

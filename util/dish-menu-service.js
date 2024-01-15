@@ -4,6 +4,8 @@ const cheerio = require('cheerio');
 const Dish = require('../models/Dish.js');
 const Menu = require('../models/Dailymenu.js');
 const Allergen = require('../models/Allergen.js');
+const Favorite = require('../models/Favorite.js');
+const Ratings = require('../models/Rating.js');
 const { createUploadAndSaveDishPicture } = require('./image-creation-service');
 const { uploadAndAddDishcardUrlToDish } = require('./speiseplan-util.js');
 
@@ -58,11 +60,58 @@ function extractDishInfo($, meal, allergenDb) {
   return dish;
 }
 
+async function updateFavoritesAndRatingsAllDishes() {
+  const dishes = await getTodaysMenu(new Date().toISOString().split('T')[0]);
+  for (const dish of dishes) {
+    await updateFavoritesAndRatings(dish);
+    console.log(dish.name);
+    console.log(dish.favorites);
+    console.log('Rating: ' + dish.rating);
+    try {
+      await dish.save();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  console.log('Favoriten und Bewertungen aktualisiert');
+}
+
+async function updateFavoritesAndRatings(dish) {
+  dish = await updateRating(dish);
+  dish = await updateFavorites(dish);
+  return dish;
+}
+
 const allergenLookup = (description, allergens) => {
   const find =
     allergens.find((allergen) => allergen.description === description) || null;
   return { number: find.number, description: find.description };
 };
+
+async function updateFavorites(dish) {
+  try {
+    const favorites = await Favorite.getFavoritesCount(dish._id);
+    if (!favorites) return;
+    dish.favorites = favorites;
+    return dish;
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren der Favoriten:', error);
+    // throw error;
+  }
+}
+
+async function updateRating(dish) {
+  try {
+    const dishid = dish._id.toString();
+    const rating = await Ratings.getAverageRating(dishid);
+    if (rating === 0) return dish;
+    dish.rating = rating;
+    return dish;
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren der Bewertungen:', error);
+    // throw error;
+  }
+}
 
 function extractIconInfo($, meal) {
   let dietType = 'keine Angabe';
@@ -341,4 +390,6 @@ module.exports = {
   getTodaysMenu,
   fetchAndSaveAllergens,
   getWeekMenu,
+  updateFavoritesAndRatings,
+  updateFavoritesAndRatingsAllDishes,
 };
