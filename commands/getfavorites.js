@@ -5,7 +5,7 @@ const Dish = require('../models/Dish.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('get-favorites')
+    .setName('favorites')
     .setDescription('Zeigt deine Lieblingsgerichte an'),
   async execute(interaction) {
     try {
