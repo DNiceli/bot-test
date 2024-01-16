@@ -120,7 +120,7 @@ module.exports = {
           const dishObj = menuImgs.find((dish) => dish.name === currentDish);
           console.log(dishObj);
           const img = dishObj.dishCard;
-          let content = 'Du hast gewählt ' + currentDish;
+          let content = 'Du hast gewählt: ' + currentDish;
           console.log(dishObj.rating);
           console.log(dishObj.favorites);
           if (parseFloat(dishObj.rating)) {

@@ -330,16 +330,16 @@ async function createOrUpdateDish(dish, category) {
       reason = reason + 'dietType';
     }
     if (existingDish.imgDelFlag) {
-      const imageId = await createUploadAndSaveDishPicture(dish.name);
-      dish.imageId = imageId;
-      dish.imgDelFlag = false;
+      const imageId = await createUploadAndSaveDishPicture(existingDish.name);
+      existingDish.imageId = imageId;
+      existingDish.imgDelFlag = false;
       needsUpdate = true;
       reason = reason + 'imgDelFlag was true';
     }
     if (process.env.UPDATE_DISHCARDS === 'true' || !existingDish.dishCard) {
       needsUpdate = true;
       await uploadAndAddDishcardUrlToDish(existingDish);
-      // console.log('Updategrund: dishcard ' + existingDish.dishCard);
+      reason = reason + 'Dishcard';
     }
     if (needsUpdate) {
       await existingDish.save();

@@ -120,64 +120,63 @@ async function generateMenuCard(dish) {
           background-color: #CCCCCC;
           position: absolute;
           top: 10px;
-          left: 10px;
+          right: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 10px;
+          border-radius: 10px; 
         }
-        .name, .price, .allergens, .eco-info {
+        .name, .allergens, .eco-info {
           color: #333333;
           position: absolute;
+          left: 20px;
+          max-width: 280px;
         }
         .name {
           font-size: 15px;
           font-weight: bold;
-          max-width: 260px;
           max-height: 40px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          left: 220px;
-          top: 40px;
+          top: 30px;
         }
         .price {
+          color: #333333;
+          position: absolute;
           color: #6495ed;
           font-weight: bold;
           font-size: 14px;
-          left: 220px;
-          top: 80px;
+          bottom: 20px;
+          left: 20px;
         }
         .allergens {
-          max-width: 200px;
           max-height: 70px;
           color: #6a6a6a;
           font-size: 10px;
-          left: 220px;
-          bottom: 50px;
+          top: 70px;
         }
         .eco-info {
-          font-size: 10px;
-          color: #6a6a6a;
-          left: 220px;
-          bottom: 30px;
+          font-size: 8px;
+          color: #5a5a5a;
+          bottom: 50px;
         }
         .diet-info {
           position: absolute;
-          bottom: 30px;
-          right: 30px;
+          bottom: 15px;
+          right: 15px;
         }
         .rating {
           font-size: 10px;
           position: absolute;
           bottom: 80px;
-          right: 30px;
+          right: 200px;
         }
         .favorites {
           font-size: 10px;
           position: absolute;
           bottom: 60px;
-          right: 30px;
+          right: 200px;
         }
         .traffic-light {
           position: absolute;
@@ -193,17 +192,13 @@ async function generateMenuCard(dish) {
               : '#00ff00'
           };
           border-left: 40px solid transparent;
+          border-radius: 0 10px 0 0;
         }
         .icon-vegan, .icon-vegetarisch {
           width: 24px;
           height: 24px;
-          background-size: cover;
-        }
-        .icon-vegan {
-          background-image: url('https://www.stw.berlin/vendor/infomax/mensen/icons/15.png');
-        }
-        .icon-vegetarisch {
-          background-image: url('https://www.stw.berlin/vendor/infomax/mensen/icons/1.png');
+          border: 2px solid white;
+          border-radius: 50%;
         }
       </style>
     </head>
@@ -215,12 +210,19 @@ async function generateMenuCard(dish) {
       <div class="allergens">Allergene: ${allergens}</div>
       <div class="eco-info">${ecoInfoString}</div>
       <div class="diet-info">
-      ${dietType === 'Vegan' ? '<div class="icon-vegan"></div>' : ''}
       ${
-        dietType === 'Vegetarisch' ? '<div class="icon-vegetarisch"></div>' : ''
+        dietType === 'Vegan'
+          ? '<div class="icon-vegan"><img src=https://www.stw.berlin/vendor/infomax/mensen/icons/15.png alt="Dish Image" style="width:100%; height:100%; border-radius: 10px;"></div>'
+          : ''
+      }
+      ${
+        dietType === 'Vegetarisch'
+          ? '<div class="icon-vegetarisch"><img src=https://www.stw.berlin/vendor/infomax/mensen/icons/1.png alt="Dish Image" style="width:100%; height:100%; border-radius: 10px;"></div>'
+          : ''
       }
       </div>
       <div class="traffic-light"></div>
+      <div class="box"></div>
       <div class="rating">${rating > 0 ? 'Ø: ' + rating + ' / 5' : ''}</div>
       <div class="favorites">${favorites > 0 ? '♡: ' + favorites : ''}</div>
     
