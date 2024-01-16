@@ -82,6 +82,9 @@ client.on(Events.MessageCreate, async (message) => {
     console.log(count);
     message.reply('Anzahl an Servern: ' + count);
   }
+  if (message.content === 'notify') {
+    await notify(client);
+  }
 
   if (message.content.startsWith('days ')) {
     // Extrahieren der Tage und der Option aus der Nachricht

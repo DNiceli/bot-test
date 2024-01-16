@@ -246,14 +246,22 @@ async function createAndSaveDishMenu(menu, date) {
     dailyMenu.dishes = dailyMenu.dishes.map((dishId) => dishId.toString());
   }
 
+  const newDishIds = new Set();
   for (const category of menu.keys()) {
     const dishes = menu.get(category);
     for (const dish of dishes) {
       const dishDocument = await createOrUpdateDish(dish, category);
+      newDishIds.add(dishDocument._id.toString());
+    }
+  }
 
-      if (!dailyMenu.dishes.includes(dishDocument._id.toString())) {
-        dailyMenu.dishes.push(dishDocument._id);
-      }
+  dailyMenu.dishes = dailyMenu.dishes.filter((dishId) =>
+    newDishIds.has(dishId),
+  );
+
+  for (const newDishId of newDishIds) {
+    if (!dailyMenu.dishes.includes(newDishId)) {
+      dailyMenu.dishes.push(newDishId);
     }
   }
 

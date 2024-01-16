@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { SlashCommandBuilder } = require('discord.js');
-const { getFavorites } = require('../models/Favorite.js');
-const { Dish } = require('../models/Dish.js');
+const Favorite = require('../models/Favorite.js');
+const Dish = require('../models/Dish.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,31 +13,26 @@ module.exports = {
       const userId = interaction.user.id;
       const guildId = interaction.guild.id;
 
-      const favorites = await getFavorites(userId, guildId);
+      const favorites = await Favorite.getFavorites(userId, guildId);
       if (!favorites) {
         await interaction.editReply('Du hast noch keine Gerichte favorisiert.');
         return;
       } else {
         const favoriteDishes = await getFavoriteDishes(favorites);
 
-        const favoriteDishesToStringSeparatedByComma =
-          favoriteDishes.join(', ');
-
-        interaction.user.send(
-          'Deine Lieblingsgerichte: ' + favoriteDishesToStringSeparatedByComma,
-        );
+        const favoriteDishesListed = favoriteDishes.join('\n');
 
         await interaction.editReply({
-          content:
-            'Deine Lieblingsgerichte: ' +
-            favoriteDishesToStringSeparatedByComma,
+          content: 'Deine Lieblingsgerichte:\n' + favoriteDishesListed,
+          ephemeral: true,
         });
       }
     } catch (error) {
       console.error(error);
-      await interaction.editReply(
-        'Es gab einen Fehler beim Favorisieren des Gerichts.',
-      );
+      await interaction.editReply({
+        content: 'Es gab einen Fehler beim Anzeigen der Gerichte.',
+        ephemeral: true,
+      });
     }
   },
 };
@@ -45,7 +40,7 @@ module.exports = {
 async function getFavoriteDishes(favorites) {
   const favoriteDishes = [];
   for (const favorite of favorites) {
-    const dish = await Dish.findOne({ id: favorite.dishId });
+    const dish = await Dish.findOne({ _id: favorite.dishId });
     if (dish) {
       favoriteDishes.push(dish.name);
     }

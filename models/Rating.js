@@ -36,6 +36,20 @@ ratingSchema.statics.getAverageRating = async function(dishId) {
   return sum / ratings.length;
 };
 
+ratingSchema.statics.findRatingsForUser = async function(userId) {
+  try {
+    if (mongoose.isValidObjectId(userId)) {
+      throw new Error('userId is required');
+    }
+    const ratings = await this.find({ userId: userId });
+    return ratings;
+  } catch (err) {
+    console.log(`Could not find ratings for user ${userId}`);
+    console.error(`Could not find ratings for user ${userId} : ${err}`);
+    return [];
+  }
+};
+
 ratingSchema.statics.createOrUpdateRating = async function(
   userId,
   dishId,
