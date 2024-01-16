@@ -91,16 +91,14 @@ async function generateMenuCard(dish) {
   let dietType = '';
   if (dish.dietType === 'vegan' || dish.dietType === 'vegetarisch') {
     dietType = dish.dietType.charAt(0).toUpperCase() + dish.dietType.slice(1);
-    console.log(dietType);
   }
   let ecoInfoString = '';
   if (dish.co2 && dish.h2o) {
     ecoInfoString = `CO2: ${dish.co2}, H2O: ${dish.h2o}`;
   }
-  const rating = parseFloat(dish.rating.toString()) || 0;
+  let rating;
+  if (dish.rating) rating = parseFloat(dish.rating.toString()) || 0;
   const favorites = dish.favorites || 0;
-  console.log(rating);
-  console.log(favorites);
   const htmlTemplate = `
   <!DOCTYPE html>
   <html>

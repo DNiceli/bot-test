@@ -19,6 +19,9 @@ client.once('ready', () => {
   console.log('Bot is online!');
   fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
   fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
+  if (process.env.UPDATE_DISHCARDS === 'true') {
+    console.log('Dishcards Überschreiben ist aktiviert');
+  }
 });
 
 client.commands = new Collection();
@@ -81,15 +84,22 @@ client.on(Events.MessageCreate, async (message) => {
   }
 
   if (message.content.startsWith('days ')) {
-    // Extrahieren der Tage aus der Nachricht
-    const days = parseInt(message.content.split(' ')[1]);
+    // Extrahieren der Tage und der Option aus der Nachricht
+    const parts = message.content.split(' ');
+    const days = parseInt(parts[1]);
+    const option = parts.length > 2 ? parts[2] : null;
     if (!isNaN(days)) {
       const date = new Date();
-      for (let i = 1; i < days; i++) {
+      console.log('updating Dishes for ' + days + ' days');
+      for (let i = 0; i < days; i++) {
         const nextDay = new Date(date);
-        nextDay.setDate(date.getDate() - i);
+        if (option === 'back') {
+          nextDay.setDate(date.getDate() - i);
+        } else {
+          nextDay.setDate(date.getDate() + i);
+        }
         if (nextDay.getDay() === 0 || nextDay.getDay() === 6) continue;
-        await fetchAndSaveDishes(nextDay.toISOString().split('T')[0]);
+        fetchAndSaveDishes(nextDay.toISOString().split('T')[0]);
       }
     } else {
       message.channel.send('Bitte geben Sie eine gültige Zahl an.');

@@ -12,9 +12,15 @@ const {
   EmbedBuilder,
 } = require('discord.js');
 const Favorite = require('../models/Favorite.js');
-const { getTodaysMenu } = require('../util/dish-menu-service.js');
+const {
+  getTodaysMenu,
+  updateRatingOnDish,
+  updateFavoritesOnDish,
+  updateDishCard,
+} = require('../util/dish-menu-service.js');
 const User = require('../models/User.js');
 const Rating = require('../models/Rating.js');
+require('dotenv').config();
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -106,6 +112,7 @@ module.exports = {
         if (i.isStringSelectMenu()) {
           currentDish = i.values[0];
           const dishObj = menuImgs.find((dish) => dish.name === currentDish);
+          console.log(dishObj);
           const img = dishObj.dishCard;
           let content = 'Du hast gewählt ' + currentDish;
           console.log(dishObj.rating);
@@ -133,9 +140,8 @@ module.exports = {
                 // TODO: Tell User to choose Dish first
                 return;
               }
-              const currentDishId = menuImgs.find(
-                (dish) => dish.name === currentDish,
-              )._id;
+              let dishObj = menuImgs.find((dish) => dish.name === currentDish);
+              const currentDishId = dishObj._id;
               const guild = i.guild.id;
               const userID = i.user.id;
               const bool = await Favorite.createOrUpdateFavorite(
@@ -147,6 +153,10 @@ module.exports = {
                 interaction.editReply({
                   content: 'Added to favorites: ' + currentDish,
                 });
+                dishObj = await updateFavoritesOnDish(dishObj);
+                if (process.env.UPDATE_DC_SP_TOGGLE === 'true') {
+                  updateDishCard(dishObj);
+                }
               } else {
                 interaction.editReply({
                   content: 'Already in favorites: ' + currentDish,
@@ -161,17 +171,14 @@ module.exports = {
                 // TODO: Tell User to choose Dish first
                 return;
               }
-              const dishname = menuImgs.find(
+              const dishObj = menuImgs.find(
                 (dish) => dish.name === currentDish,
-              ).name;
-              const dishId = menuImgs.find(
-                (dish) => dish.name === currentDish,
-              )._id;
-              const modal = createRateModal(dishname);
+              );
+              const modal = createRateModal(dishObj.name);
               // problem: dishname is undefined
               await i.showModal(modal);
               const submission = await i.awaitModalSubmit({ time: 60_000 });
-              await handleSubmission(submission, dishId, currentDish);
+              await handleSubmission(submission, dishObj);
               break;
             }
             case 'diet': {
@@ -252,7 +259,7 @@ function sizeOf(menuImgs) {
   console.log(`Size of MenuImage: ${kiloBytes} KB`);
 }
 
-async function handleSubmission(submission, dishId, currentDish) {
+async function handleSubmission(submission, dish) {
   if (!submission) {
     submission.update({ content: 'You did not provide a rating' });
   } else if (submission.isModalSubmit()) {
@@ -277,12 +284,16 @@ async function handleSubmission(submission, dishId, currentDish) {
     const userId = submission.user.id;
     await Rating.createOrUpdateRating(
       userId,
-      dishId,
+      dish._id,
       ratingValue,
       ratingComment,
     );
+    dish = await updateRatingOnDish(dish);
+    if (process.env.UPDATE_DC_SP_TOGGLE === 'true') {
+      updateDishCard(dish);
+    }
     await submission.update({
-      content: 'You rated ' + currentDish + ' with ' + ratingValue,
+      content: 'You rated ' + dish.name + ' with ' + ratingValue,
     });
   }
 }

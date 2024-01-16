@@ -11,6 +11,7 @@ const { uploadAndAddDishcardUrlToDish } = require('./speiseplan-util.js');
 
 async function fetchAndSaveDishes(date) {
   try {
+    console.log('Begin Dish Fetching process...');
     let allergenDb = await Allergen.find();
     if (!allergenDb) {
       allergenDb = await fetchAndSaveAllergens();
@@ -31,7 +32,6 @@ async function fetchAndSaveDishes(date) {
       menu.set(group, dishes);
     });
     createAndSaveDishMenu(menu, date);
-    return menu;
   } catch (error) {
     console.error(error);
   }
@@ -77,8 +77,8 @@ async function updateFavoritesAndRatingsAllDishes() {
 }
 
 async function updateFavoritesAndRatings(dish) {
-  dish = await updateRating(dish);
-  dish = await updateFavorites(dish);
+  dish = await updateRatingOnDish(dish);
+  dish = await updateFavoritesOnDish(dish);
   return dish;
 }
 
@@ -88,7 +88,7 @@ const allergenLookup = (description, allergens) => {
   return { number: find.number, description: find.description };
 };
 
-async function updateFavorites(dish) {
+async function updateFavoritesOnDish(dish) {
   try {
     const favorites = await Favorite.getFavoritesCount(dish._id);
     if (!favorites) return;
@@ -100,7 +100,7 @@ async function updateFavorites(dish) {
   }
 }
 
-async function updateRating(dish) {
+async function updateRatingOnDish(dish) {
   try {
     const dishid = dish._id.toString();
     const rating = await Ratings.getAverageRating(dishid);
@@ -167,6 +167,7 @@ async function fetchAndSaveAllergens(date) {
   }
 
   async function updateOldOrSaveNewAllergens(allergens) {
+    console.log('Aktualisiere Allergene');
     for (const allergenData of allergens) {
       const existingAllergen = await Allergen.findOne({
         number: allergenData.nr,
@@ -234,7 +235,6 @@ async function requestSiteAndLoadHTML(date, resources_id) {
 }
 
 async function createAndSaveDishMenu(menu, date) {
-  // const today = new Date().toISOString().split('T')[0];
   let dailyMenu = await Menu.findOne({ date: date });
 
   if (!dailyMenu) {
@@ -259,6 +259,11 @@ async function createAndSaveDishMenu(menu, date) {
 
   await dailyMenu.save();
   console.log(`Menu for ${date} updated`);
+}
+
+async function updateDishCard(dish) {
+  dish = await uploadAndAddDishcardUrlToDish(dish);
+  await dish.save();
 }
 
 async function createOrUpdateDish(dish, category) {
@@ -286,7 +291,7 @@ async function createOrUpdateDish(dish, category) {
     if (existingDish.price !== dish.price) {
       existingDish.price = dish.price;
       needsUpdate = true;
-      console.log('Updategrund: price ');
+      // console.log('Updategrund: price ');
     }
     if (
       JSON.stringify(existingDish.allergens) !== JSON.stringify(dish.allergens)
@@ -297,31 +302,31 @@ async function createOrUpdateDish(dish, category) {
     if (existingDish.co2 !== dish.co2) {
       existingDish.co2 = dish.co2;
       needsUpdate = true;
-      console.log('Updategrund: co2 ' + dish.co2);
+      // console.log('Updategrund: co2 ' + dish.co2);
     }
     if (existingDish.h2o !== dish.h2o) {
       existingDish.h2o = dish.h2o;
       needsUpdate = true;
-      console.log('Updategrund: h2o ' + dish.h2o);
+      // console.log('Updategrund: h2o ' + dish.h2o);
     }
     if (existingDish.ampel !== dish.ampel) {
       existingDish.ampel = dish.ampel;
       needsUpdate = true;
-      console.log('Updategrund: ampel' + dish.ampel);
+      // console.log('Updategrund: ampel' + dish.ampel);
     }
     if (existingDish.dietType !== dish.dietType) {
       existingDish.dietType = dish.dietType;
       needsUpdate = true;
-      console.log('Updategrund: diet' + dish.dietType);
+      // console.log('Updategrund: diet' + dish.dietType);
     }
-    if (!existingDish.dishCard) {
+    if (process.env.UPDATE_DISHCARDS === 'true' || !existingDish.dishCard) {
       needsUpdate = true;
       await uploadAndAddDishcardUrlToDish(existingDish);
-      console.log('Updategrund: dishcard ' + existingDish.dishCard);
+      // console.log('Updategrund: dishcard ' + existingDish.dishCard);
     }
     if (needsUpdate) {
       await existingDish.save();
-      console.log(`Dish updated: ${existingDish.name}`);
+      // console.log(`Dish updated: ${existingDish.name}`);
     }
   }
   return existingDish;
@@ -392,4 +397,7 @@ module.exports = {
   getWeekMenu,
   updateFavoritesAndRatings,
   updateFavoritesAndRatingsAllDishes,
+  updateFavoritesOnDish,
+  updateRatingOnDish,
+  updateDishCard,
 };
