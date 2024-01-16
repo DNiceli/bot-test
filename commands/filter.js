@@ -13,8 +13,8 @@ const { fetchAndSaveAllergens } = require('../util/dish-menu-service');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('settings')
-    .setDescription('Einstellungen wie Filter, Benachrichtigungen, etc.'),
+    .setName('filter')
+    .setDescription('Allergenfilter einstellen.'),
   async execute(interaction) {
     try {
       const allergens = await findOrFetchAllergens();

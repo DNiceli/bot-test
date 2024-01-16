@@ -5,7 +5,7 @@ const Notification = require('../models/Notification.js');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('toggle-notification')
-    .setDescription('Enable / Disable Dish Notifications'),
+    .setDescription('Benachrichtigungen aktivieren/deaktivieren'),
   async execute(interaction) {
     try {
       const userid = interaction.user.id;

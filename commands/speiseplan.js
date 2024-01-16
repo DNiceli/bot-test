@@ -25,7 +25,9 @@ require('dotenv').config();
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('speiseplan')
-    .setDescription('sieht speiseplan in dishcard mit buttons')
+    .setDescription(
+      'Zeigt den Speiseplan an. Benutzt den /filter um Allergene zu Filtern. Parameter sind Optional.',
+    )
     .addStringOption((option) =>
       option
         .setName('woche')

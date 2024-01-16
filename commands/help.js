@@ -12,11 +12,12 @@ module.exports = {
     );
 
     const commandList = commandNames.map((name, index) => {
-      return `${name}: ${commandDescriptions[index]}`;
+      return `**/${name}**: ${commandDescriptions[index]}`;
     });
 
     await interaction.reply({
-      content: 'Folgende Befehle sind verfügbar: \n' + commandList.join('\n'),
+      content:
+        'Folgende Slash-Befehle sind verfügbar: \n' + commandList.join('\n'),
       ephemeral: true,
     });
   },
