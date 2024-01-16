@@ -13,9 +13,9 @@ module.exports = {
       if (!notification) {
         notification = await Notification.create({
           userId: userid,
-          notification: false,
+          notification: true,
         });
-        interaction.reply('Notifications created + enabled');
+        interaction.reply('Notifications enabled');
       } else if (notification.notification === false) {
         notification.notification = true;
         await notification.save();
