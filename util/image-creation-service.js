@@ -13,7 +13,7 @@ cloudinary.config({
 
 async function createDishPictureDalle(dishName) {
   try {
-    let prompt = `Generiere ein, für eine Speisekarte geeignetes Bild von dem Gericht: ${dishName} . Das Gericht sollte auf einem Teller oder einer Schüssel serviert sein. Geh davon aus, dass das Gericht zubereitet ist, falls nicht anders beschrieben, oder das Gericht etwas wie Gemüse ist. `;
+    let prompt = `Generiere ein, für eine Speisekarte geeignetes Bild von dem Essen: ${dishName} . Das Essen sollte auf einem Teller oder einer Schüssel serviert sein. Es soll ausschließlich das Essen zu sehen sein und der Hintergrund soll neutral sein. `;
     if (dishName === 'Süß-Sauer-Scharf Suppe') {
       prompt =
         'Generiere ein, für eine Speisekarte geeignetes Bild von dem Gericht: Sweet Sour Spicy Soup .';
