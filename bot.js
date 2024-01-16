@@ -17,8 +17,10 @@ const client = new Client({
 
 client.once('ready', () => {
   console.log('Bot is online!');
-  fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
-  fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
+  if (process.env.FETCH_ON_START === 'true') {
+    fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
+    fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
+  }
   if (process.env.UPDATE_DISHCARDS === 'true') {
     console.log('Dishcards Überschreiben ist aktiviert');
   }

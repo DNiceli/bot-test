@@ -63,6 +63,10 @@ const dishSchema = new Schema(
       type: Number,
       required: false,
     },
+    imgDelFlag: {
+      type: Boolean,
+      required: false,
+    },
   },
   {
     timestamps: true,

@@ -295,6 +295,7 @@ async function createOrUpdateDish(dish, category) {
     console.log(`Dish created: ${existingDish.name}`);
   } else {
     let needsUpdate = false;
+    let reason = '';
 
     if (existingDish.price !== dish.price) {
       existingDish.price = dish.price;
@@ -306,26 +307,34 @@ async function createOrUpdateDish(dish, category) {
     ) {
       existingDish.allergens = dish.allergens;
       needsUpdate = true;
+      reason = reason + 'allergens';
     }
     if (existingDish.co2 !== dish.co2) {
       existingDish.co2 = dish.co2;
       needsUpdate = true;
-      // console.log('Updategrund: co2 ' + dish.co2);
+      reason = reason + 'co2';
     }
     if (existingDish.h2o !== dish.h2o) {
       existingDish.h2o = dish.h2o;
       needsUpdate = true;
-      // console.log('Updategrund: h2o ' + dish.h2o);
+      reason = reason + 'h2o';
     }
     if (existingDish.ampel !== dish.ampel) {
       existingDish.ampel = dish.ampel;
       needsUpdate = true;
-      // console.log('Updategrund: ampel' + dish.ampel);
+      reason = reason + 'ampel';
     }
     if (existingDish.dietType !== dish.dietType) {
       existingDish.dietType = dish.dietType;
       needsUpdate = true;
-      // console.log('Updategrund: diet' + dish.dietType);
+      reason = reason + 'dietType';
+    }
+    if (existingDish.imgDelFlag) {
+      const imageId = await createUploadAndSaveDishPicture(dish.name);
+      dish.imageId = imageId;
+      dish.imgDelFlag = false;
+      needsUpdate = true;
+      reason = reason + 'imgDelFlag was true';
     }
     if (process.env.UPDATE_DISHCARDS === 'true' || !existingDish.dishCard) {
       needsUpdate = true;
@@ -334,7 +343,7 @@ async function createOrUpdateDish(dish, category) {
     }
     if (needsUpdate) {
       await existingDish.save();
-      // console.log(`Dish updated: ${existingDish.name}`);
+      console.log(`Dish updated: ${existingDish.name}, ${reason}`);
     }
   }
   return existingDish;

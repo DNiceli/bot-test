@@ -149,7 +149,8 @@ async function generateMenuCard(dish) {
           top: 80px;
         }
         .allergens {
-          max-width: 150px;
+          max-width: 200px;
+          max-height: 70px;
           color: #6a6a6a;
           font-size: 10px;
           left: 220px;

@@ -57,6 +57,10 @@ module.exports = {
   async execute(interaction) {
     try {
       await interaction.deferReply({ ephemeral: true });
+      let admin = false;
+      if (interaction.user.id === process.env.ADMIN_ID) {
+        admin = true;
+      }
       const woche = interaction.options.getString('woche');
       const wochentag = parseInt(
         interaction.options.getString('wochentag'),
@@ -88,7 +92,7 @@ module.exports = {
 
       await populateMenuImgs(dailyMenu, userAllergens, menuImgs);
       sizeOf(menuImgs);
-      const components = createDishSelectMenu(menuImgs);
+      const components = createDishSelectMenu(menuImgs, admin);
 
       const dishEmbed = createDishListEmbed(menuImgs);
 
@@ -183,6 +187,19 @@ module.exports = {
               await handleSubmission(submission, dishObj);
               break;
             }
+            case 'admin': {
+              if (!currentDish) {
+                await i.deferUpdate();
+                return;
+              }
+              const dishObj = menuImgs.find(
+                (dish) => dish.name === currentDish,
+              );
+              dishObj.imgDelFlag = true;
+              await i.deferUpdate();
+              dishObj.save();
+              break;
+            }
             case 'diet': {
               let filteredMenuImgs = menuImgs;
               console.log(filteredMenuImgs);
@@ -216,7 +233,10 @@ module.exports = {
                   .setStyle(ButtonStyle.Secondary);
               }
               console.log(button.toJSON());
-              const newComponents = createDishSelectMenu(filteredMenuImgs);
+              const newComponents = createDishSelectMenu(
+                filteredMenuImgs,
+                admin,
+              );
               newComponents[1].components[3] = button;
               const newEmbed = createDishListEmbed(filteredMenuImgs);
               await i.update({ components: newComponents, embeds: [newEmbed] });
@@ -360,7 +380,7 @@ async function findOrCreateUserAllergens(interaction) {
   return userAllergens;
 }
 
-function createDishSelectMenu(menuImgs) {
+function createDishSelectMenu(menuImgs, admin) {
   const components = [];
   menuImgs = menuImgs.sort((a, b) => a.category.localeCompare(b.category));
   const selectMenu = new StringSelectMenuBuilder()
@@ -395,6 +415,14 @@ function createDishSelectMenu(menuImgs) {
       .setLabel('Diet Typ')
       .setStyle(ButtonStyle.Secondary),
   );
+  if (admin) {
+    buttonRow.addComponents(
+      new ButtonBuilder()
+        .setCustomId('admin')
+        .setLabel('DelImg')
+        .setStyle(ButtonStyle.Secondary),
+    );
+  }
   components.push(buttonRow);
   return components;
 }
