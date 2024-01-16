@@ -156,13 +156,10 @@ function categorizeUserAllergens(
 ) {
   allergens.forEach((allergen) => {
     const numericPart = parseInt(allergen.number, 10);
-    // Extract numeric part for grouping
     const menuId = isNaN(numericPart)
       ? 'filter-unknown'
       : `filter-${Math.floor(numericPart === 24 ? 1 : numericPart / 25)}`;
-    console.log('menuID ' + menuId);
 
-    // Use the full alphanumeric value for identification
     if (userAllergenValues.has(allergen.number)) {
       if (!selectedValues.has(menuId)) {
         selectedValues.set(menuId, []);
@@ -177,7 +174,6 @@ async function findOrFetchAllergens() {
   try {
     allergens = await Allergen.find();
   } catch (error) {
-    // Handle the error or fallback if Allergen.find() fails
     console.error('Error fetching allergens:', error);
     allergens = await fetchAndSaveAllergens();
   }

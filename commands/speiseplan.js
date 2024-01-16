@@ -88,7 +88,6 @@ module.exports = {
       }
       const userAllergens = await findOrCreateUserAllergens(interaction);
       const menuImgs = [];
-      // console.log(dailyMenu.map((dish) => dish.name).join(", "));           possibly openAi keyword generation for dishes to generate recommendations
 
       await populateMenuImgs(dailyMenu, userAllergens, menuImgs);
       sizeOf(menuImgs);
@@ -118,11 +117,8 @@ module.exports = {
         if (i.isStringSelectMenu()) {
           currentDish = i.values[0];
           const dishObj = menuImgs.find((dish) => dish.name === currentDish);
-          console.log(dishObj);
           const img = dishObj.dishCard;
           let content = 'Du hast gewählt: ' + currentDish;
-          console.log(dishObj.rating);
-          console.log(dishObj.favorites);
           if (parseFloat(dishObj.rating)) {
             content = content + ' avg Rating: ' + dishObj.rating;
           }
@@ -202,14 +198,11 @@ module.exports = {
             }
             case 'diet': {
               let filteredMenuImgs = menuImgs;
-              console.log(filteredMenuImgs);
               const rows = i.message.components;
               let button = rows[1].components.find(
                 (c) => c.customId === 'diet',
               );
-              console.log(button.toJSON());
               if (button.label === 'Diet Typ') {
-                console.log('shouldwork');
                 button = new ButtonBuilder()
                   .setCustomId('diet')
                   .setLabel('Vegetarisch')
@@ -232,7 +225,6 @@ module.exports = {
                   .setLabel('Diet Typ')
                   .setStyle(ButtonStyle.Secondary);
               }
-              console.log(button.toJSON());
               const newComponents = createDishSelectMenu(
                 filteredMenuImgs,
                 admin,

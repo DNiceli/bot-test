@@ -111,6 +111,12 @@ client.on(Events.MessageCreate, async (message) => {
     }
   }
 
+  if (message.content.startsWith('dateFetch ')) {
+    const input = message.content.split(' ')[1];
+    const date = new Date(input);
+    fetchAndSaveDishes(date);
+  }
+
   if (message.content === 'updateRF') {
     await updateFavoritesAndRatingsAllDishes();
   }
