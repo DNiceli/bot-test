@@ -26,7 +26,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('speiseplan')
     .setDescription(
-      'Zeigt den Speiseplan an. Benutzt den /filter um Allergene zu Filtern. Parameter sind Optional.',
+      'Zeigt den Speiseplan an. Parameter sind Optional, ohne Angabe wird der heutige Speiseplan angezeigt.',
     )
     .addStringOption((option) =>
       option
