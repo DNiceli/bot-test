@@ -71,15 +71,20 @@ favoriteSchema.statics.getFavorites = async function(userId) {
 };
 
 favoriteSchema.statics.getFavoritesCount = async function(dishId) {
-  const favorites = await Favorite.find({
-    dishId: dishId,
-  });
-  if (!favorites) {
-    console.log('No favorites found');
+  try {
+    const favorites = await Favorite.find({
+      dishId: dishId,
+    });
+    if (!favorites) {
+      console.log('No favorites found');
+      return 0;
+    }
+
+    return favorites.length;
+  } catch (error) {
+    console.error('Error fetching favorites:', error);
     return 0;
   }
-
-  return favorites.length;
 };
 
 favoriteSchema.statics.getMostFavoritedDishes = async function() {

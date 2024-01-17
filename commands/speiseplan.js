@@ -109,7 +109,7 @@ module.exports = {
             i.componentType === ComponentType.StringSelect ||
             i.componentType === ComponentType.Modal) &&
           i.user.id === interaction.user.id,
-        time: 300_000,
+        time: 300_000_000,
       });
 
       let currentDish;
@@ -153,7 +153,7 @@ module.exports = {
               );
               if (bool) {
                 interaction.editReply({
-                  content: 'Added to favorites: ' + currentDish,
+                  content: 'Zu Favoriten hinzugefügt: ' + currentDish,
                 });
                 dishObj = await updateFavoritesOnDish(dishObj);
                 if (process.env.UPDATE_DC_SP_TOGGLE === 'true') {
@@ -161,8 +161,19 @@ module.exports = {
                 }
               } else {
                 interaction.editReply({
-                  content: 'Already in favorites: ' + currentDish,
+                  content: 'Von Favoriten entfernt: ' + currentDish,
                 });
+                await Favorite.deleteOne({
+                  userId: userID,
+                  guildId: guild,
+                  dishId: currentDishId,
+                });
+                dishObj = await updateFavoritesOnDish(dishObj);
+                console.log(dishObj);
+                dishObj.imageId = dishObj.imageId._id;
+                if (process.env.UPDATE_DC_SP_TOGGLE === 'true') {
+                  updateDishCard(dishObj);
+                }
               }
               await i.deferUpdate();
               break;

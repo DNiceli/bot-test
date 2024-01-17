@@ -90,8 +90,9 @@ const allergenLookup = (description, allergens) => {
 
 async function updateFavoritesOnDish(dish) {
   try {
+    console.log('Aktualisiere Favoriten');
+    console.log(dish);
     const favorites = await Favorite.getFavoritesCount(dish._id);
-    if (!favorites) return;
     dish.favorites = favorites;
     return dish;
   } catch (error) {

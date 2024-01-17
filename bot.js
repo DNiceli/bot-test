@@ -8,7 +8,7 @@ const { notify } = require('./util/notification-service.js');
 const { createDishPictureDalle } = require('./util/image-creation-service.js');
 const cron = require('node-cron');
 // prettier-ignore
-const { Client, Collection, Events, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, Collection, Events, GatewayIntentBits, Partials, ActivityType } = require('discord.js');
 // prettier-ignore
 const client = new Client({
   intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessages ],
@@ -18,6 +18,15 @@ const client = new Client({
 client.once('ready', () => {
   console.log('Bot is online!');
   checkToggles();
+  client.user.setPresence({
+    activities: [
+      {
+        type: ActivityType.Custom,
+        name: 'custom',
+        state: '/help für Befehlsliste',
+      },
+    ],
+  });
   if (process.env.FETCH_ON_START === 'true') {
     fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
     fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
