@@ -17,12 +17,10 @@ const client = new Client({
 
 client.once('ready', () => {
   console.log('Bot is online!');
+  checkToggles();
   if (process.env.FETCH_ON_START === 'true') {
     fetchAndSaveDishes(new Date().toISOString().split('T')[0]);
     fetchAndSaveAllergens(new Date().toISOString().split('T')[0]);
-  }
-  if (process.env.UPDATE_DISHCARDS === 'true') {
-    console.log('Dishcards Überschreiben ist aktiviert');
   }
 });
 
@@ -126,6 +124,21 @@ client.on(Events.MessageCreate, async (message) => {
     await createDishPictureDalle(dishName);
   }
 });
+
+function checkToggles() {
+  if (process.env.UPDATE_DISHCARDS === 'true') {
+    console.log('Dishcards Überschreiben ist aktiviert.');
+  }
+  if (process.env.UPDATE_DC_SP_TOGGLE === 'true') {
+    console.log('Dishcards Überschreiben durch Usernutzung ist aktiviert.');
+  }
+  if (process.env.OVERRIDE_DATE === 'true') {
+    console.log('Datum überschreiben ist aktiviert.');
+  }
+  if (process.env.FETCH_ON_START === 'true') {
+    console.log('Fetch on start ist aktiviert.');
+  }
+}
 
 async function getGuildCount() {
   const guilds = await client.guilds.fetch();
