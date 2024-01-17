@@ -45,13 +45,11 @@ module.exports = {
         .setDescription('Wochentag')
         .setRequired(false)
         .addChoices(
-          { name: 'Sonntag', value: '0' },
           { name: 'Montag', value: '1' },
           { name: 'Dienstag', value: '2' },
           { name: 'Mittwoch', value: '3' },
           { name: 'Donnerstag', value: '4' },
           { name: 'Feitag', value: '5' },
-          { name: 'Samstag', value: '6' },
         ),
     ),
   async execute(interaction) {
@@ -96,7 +94,7 @@ module.exports = {
       const dishEmbed = createDishListEmbed(menuImgs);
 
       const response = await interaction.editReply({
-        content: 'Adjust the settings here:',
+        content: `Hier ist der Speiseplan für das Datum: ${date}`,
         components: components,
         fetchReply: true,
         ephemeral: true,
