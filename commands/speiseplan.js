@@ -26,7 +26,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName('speiseplan')
     .setDescription(
-      'Zeigt den Speiseplan an. Parameter sind Optional, ohne Angabe wird der heutige Speiseplan angezeigt.',
+      'Zeigt ohne Parameter den heutigen Speiseplan an. Optionale Parameter für die Anzeige von anderen Tagen.',
     )
     .addStringOption((option) =>
       option
